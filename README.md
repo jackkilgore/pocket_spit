@@ -7,7 +7,7 @@ Hello Karl, this presentation of a problem is inspired by Pau's wonderful use of
 
 In this repo, you will see a small max patch. This max patch uses a named `jit.matrix` to create a simple feedback loop based on an initial seed value. The only transformation applied is a rotation.
 
-To use it, toggle `jit.world`, tap the `bang` labeled SEED, toggle the `qmetro`, and set `theta` to be some non-zero value. You can play with the resolution of the seed and the `theta` parameter to come up with some neat, streaky patterns. I reccomend using a theta` below 0.01.
+To use it, toggle `jit.world`, tap the `bang` labeled SEED, toggle the `qmetro`, and set `theta` to be some non-zero value. You can play with the resolution of the seed and the `theta` parameter to come up with some neat, streaky patterns. I reccomend using a `theta` below 0.01.
 
 I would like to translate this sketch into a p5js sketch.
 
