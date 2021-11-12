@@ -24,20 +24,11 @@ vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
     return uv;
 }
 
-// Alpha blend. Currently unused.
-vec4 blend(vec4 left, vec4 right)
-{
-	float alpha_left = left.a;
-	float alpha_right = 1. - alpha_left;
-	vec4 n_right = vec4(right.xyz, alpha_right);
-	return left + n_right;
-}
-
 void main( void ) {
     vec2 pos = gl_FragCoord.xy/u_resolution.xy;
 
 	vec4 new_pix;
-	// Return state
+	// Return state with no transformations applied.
 	if (u_bang == 0) {
 		new_pix = texture2D(u_state, pos);
 	}

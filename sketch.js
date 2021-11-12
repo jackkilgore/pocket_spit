@@ -41,7 +41,7 @@ function setup() {
 }
 
 function draw() {
-	// Trigger running every second.
+	// Metro: trigger event every second.
 	if (int(millis()) % 1000 < 100) {
 		bang = 1
 	}
