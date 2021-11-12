@@ -6,13 +6,11 @@ precision mediump float;
 precision mediump int;
 #endif
 
-uniform sampler2D u_buffer;
-uniform sampler2D u_seed;
-uniform vec2 u_seed_res;
-uniform sampler2D u_incoming;
+uniform sampler2D u_state;
 
 uniform vec2 u_resolution;
 uniform float u_timeS;
+uniform int u_bang;
 
 //src: https://godotengine.org/qa/41400/simple-texture-rotation-shader
 vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
@@ -26,14 +24,32 @@ vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
     return uv;
 }
 
+// Alpha blend. Currently unused.
+vec4 blend(vec4 left, vec4 right)
+{
+	float alpha_left = left.a;
+	float alpha_right = 1. - alpha_left;
+	vec4 n_right = vec4(right.xyz, alpha_right);
+	return left + n_right;
+}
+
 void main( void ) {
     vec2 pos = gl_FragCoord.xy/u_resolution.xy;
-    vec2 movie_pos = vec2(pos.x,1.-pos.y);
 
-	vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.25), 0.1 * M_2PI * u_timeS);
+	vec4 new_pix;
+	// Return state
+	if (u_bang == 0) {
+		new_pix = texture2D(u_state, pos);
+	}
+	// Do feedback chain here:
+	else {
+		// Rotate by theta. 
+		// Notice how we are attempting to replace time dependent rotation with state depenendent.
+		float theta = 0.1;
+		vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.5), theta);
+		new_pix = texture2D(u_state, rot_pos);
+	}
 
-    vec4 last_pix = texture2D(u_buffer, rot_pos);
-
-    gl_FragColor = last_pix;
+    gl_FragColor = new_pix;
 
 }

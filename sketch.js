@@ -1,8 +1,9 @@
 let distort_s
-let movie
-let buffer
+let state
 let seed
-let SEED_RES = [32,20]
+let SEED_RES = [2,2]
+let CANVAS_RES = [800,500]
+let bang = 0
 
 function preload() {
 	distort_s = loadShader('assets/basic.vert',
@@ -10,12 +11,15 @@ function preload() {
 }
 function setup() {
 	pixelDensity(1)
-	createCanvas(800,500)
-	noStroke()
+	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
 
-	screen = createGraphics(800,500, WEBGL)
+	// This will run the shader
+	screen = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 
-	buffer = createGraphics(800,500)
+	// This will maintain state
+	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1])
+
+	// Build a random seed image
 	seed = []
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
@@ -25,34 +29,45 @@ function setup() {
 		}
 	}
 
-	let scale = [SEED_RES[0]/buffer.width, SEED_RES[1]/buffer.height] 
-	for (i = 0; i < buffer.width; i++) {
-		for (j = 0; j < buffer.height; j++) {
-			buffer.set(i,j,seed[floor(i*scale[0])][floor(j*scale[1])])
+	// Load seed image into the state
+	state.loadPixels()
+	let scale = [SEED_RES[0]/state.width, SEED_RES[1]/state.height] 
+	for (i = 0; i < state.width; i++) {
+		for (j = 0; j < state.height; j++) {
+			state.set(i,j,seed[floor(i*scale[0])][floor(j*scale[1])])
 		}
 	}
-	buffer.updatePixels()
+	state.updatePixels()
 }
 
 function draw() {
-	background(220)
-	distort_s.setUniform('u_resolution', [screen.width, screen.height])
-	distort_s.setUniform('u_buffer', buffer)
-	distort_s.setUniform('u_timeS', millis()/1000)
-	// distort_s.setUniform('u_seed', seed)
-	// distort_s.setUniform('u_seed_res', SEED_RES)
+	// Trigger running every second.
+	if (int(millis()) % 1000 < 100) {
+		bang = 1
+	}
 
+	background(220)
+	// Set Uniforms
+	distort_s.setUniform('u_resolution', [screen.width, screen.height])
+	distort_s.setUniform('u_state', state)
+	distort_s.setUniform('u_timeS', millis()/1000)
+	distort_s.setUniform('u_bang', bang)
+
+	// Run shader: use state to create some output
 	screen.shader(distort_s)
 	screen.rect(0,0,width,height)
+
+	// Write screen output to ~the~ screen.
 	image(screen,0,0,width,height)
 
-	buffer.copy(screen,
-		0,0,
+	// Write screen output to state.
+	// FAILURE: This doesn't seem to be copying anything new into state.
+	state.copy(screen,
+		-screen.width/2,-screen.height/2,
 		screen.width,screen.height,
 		0,0,
-		buffer.width,buffer.height)
-}
-
-function windowResized(){
-	resizeCanvas(windowWidth, windowHeight)
+		state.width,state.height)
+	state.updatePixels()
+	
+	bang = 0
 }
