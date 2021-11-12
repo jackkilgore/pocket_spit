@@ -2,7 +2,7 @@ let distort_s
 let movie
 let buffer
 let seed
-let SEED_RES = [600,500]
+let SEED_RES = [32,20]
 
 function preload() {
 	distort_s = loadShader('assets/basic.vert',
@@ -10,14 +10,12 @@ function preload() {
 }
 function setup() {
 	pixelDensity(1)
-	createCanvas(600,500)
+	createCanvas(800,500)
 	noStroke()
 
-	screen = createGraphics(600,500, WEBGL)
-	screen.pixelDensity(1)
-	screen.noStroke()
+	screen = createGraphics(800,500, WEBGL)
 
-	buffer = createGraphics(600,500)
+	buffer = createGraphics(800,500)
 	seed = []
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
@@ -38,7 +36,7 @@ function setup() {
 
 function draw() {
 	background(220)
-	distort_s.setUniform('u_resolution', [width, height])
+	distort_s.setUniform('u_resolution', [screen.width, screen.height])
 	distort_s.setUniform('u_buffer', buffer)
 	distort_s.setUniform('u_timeS', millis()/1000)
 	// distort_s.setUniform('u_seed', seed)

@@ -30,7 +30,7 @@ void main( void ) {
     vec2 pos = gl_FragCoord.xy/u_resolution.xy;
     vec2 movie_pos = vec2(pos.x,1.-pos.y);
 
-	vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.5), 0.01 * M_2PI * u_timeS);
+	vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.25), 0.1 * M_2PI * u_timeS);
 
     vec4 last_pix = texture2D(u_buffer, rot_pos);
 
