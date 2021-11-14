@@ -24,6 +24,24 @@ vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
     return uv;
 }
 
+// I think this is correct....
+// https://en.wikipedia.org/wiki/Rotation_matrix
+vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
+    return
+      (v - pivot)
+      * mat2(
+          vec2(cos(angle), -sin(angle)),
+          vec2(sin(angle),cos(angle)))
+      + pivot;
+}
+
+vec2 quantize(vec2 rot) {
+	rot *= u_resolution;
+	rot = rot - fract(rot);
+	rot /= u_resolution;
+	return rot;
+}
+
 // Alpha blend. Currently unused.
 vec4 blend(vec4 left, vec4 right)
 {
@@ -35,21 +53,15 @@ vec4 blend(vec4 left, vec4 right)
 
 void main( void ) {
     vec2 pos = gl_FragCoord.xy/u_resolution.xy;
-
+	pos.y = 1.0 - pos.y;
 	vec4 new_pix;
-	// Return state
-	if (u_bang == 0) {
-		new_pix = texture2D(u_state, pos);
-	}
-	// Do feedback chain here:
-	else {
-		// Rotate by theta. 
-		// Notice how we are attempting to replace time dependent rotation with state depenendent.
-		float theta = 0.1;
-		vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.5), theta);
-		new_pix = texture2D(u_state, rot_pos);
-	}
 
+	// Rotate by theta. 
+	// Notice how we are attempting to replace time dependent rotation with state depenendent.
+	float theta = M_2PI * 0.001;
+	vec2 rot_pos = rotate2D(pos, vec2(0.5,0.5), theta);
+	rot_pos = quantize(rot_pos);
+	new_pix = texture2D(u_state, rot_pos);
     gl_FragColor = new_pix;
 
 }

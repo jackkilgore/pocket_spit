@@ -1,7 +1,7 @@
 let distort_s
 let state
 let seed
-let SEED_RES = [2,2]
+let SEED_RES = [10,10]
 let CANVAS_RES = [800,500]
 let bang = 0
 
@@ -17,7 +17,7 @@ function setup() {
 	screen = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 
 	// This will maintain state
-	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1])
+	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 
 	// Build a random seed image
 	seed = []
@@ -29,15 +29,25 @@ function setup() {
 		}
 	}
 
+	let tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
+  
 	// Load seed image into the state
-	state.loadPixels()
-	let scale = [SEED_RES[0]/state.width, SEED_RES[1]/state.height] 
-	for (i = 0; i < state.width; i++) {
-		for (j = 0; j < state.height; j++) {
-			state.set(i,j,seed[floor(i*scale[0])][floor(j*scale[1])])
-		}
+	tmp.loadPixels();
+	let scale = [SEED_RES[0] / state.width, SEED_RES[1] / state.height];
+	for (i = 0; i < tmp.width; i++) {
+	  for (j = 0; j < tmp.height; j++) {
+		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
+	  }
 	}
-	state.updatePixels()
+	tmp.updatePixels();
+	
+	
+	//tmp.line(0, 0, tmp.width, tmp.height)
+	
+	state.push()
+	state.translate(-state.width/2, -state.height/2)
+	state.image(tmp, 0, 0);
+	state.pop()
 }
 
 function draw() {
@@ -45,8 +55,8 @@ function draw() {
 	if (int(millis()) % 1000 < 100) {
 		bang = 1
 	}
+	// bang = 1
 
-	background(220)
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
 	distort_s.setUniform('u_state', state)
@@ -55,19 +65,19 @@ function draw() {
 
 	// Run shader: use state to create some output
 	screen.shader(distort_s)
+	screen.push()
+	screen.translate(-screen.width/2, -screen.height/2)
 	screen.rect(0,0,width,height)
+	screen.pop()
 
-	// Write screen output to ~the~ screen.
-	image(screen,0,0,width,height)
+	state.push()
+	state.translate(-state.width/2, -state.height/2)
+	state.image(screen, 0, 0);
+	state.pop()
 
-	// Write screen output to state.
-	// FAILURE: This doesn't seem to be copying anything new into state.
-	state.copy(screen,
-		-screen.width/2,-screen.height/2,
-		screen.width,screen.height,
-		0,0,
-		state.width,state.height)
-	state.updatePixels()
-	
 	bang = 0
+
+	// DRAW
+	background(220)
+	image(screen,0,0,width,height)
 }
