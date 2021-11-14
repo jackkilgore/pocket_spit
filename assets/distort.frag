@@ -11,6 +11,7 @@ uniform sampler2D u_state;
 uniform vec2 u_resolution;
 uniform float u_timeS;
 uniform int u_bang;
+uniform int u_toggle;
 
 //src: https://godotengine.org/qa/41400/simple-texture-rotation-shader
 vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
@@ -35,6 +36,8 @@ vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
       + pivot;
 }
 
+// I think this is broken
+// Reason: output is different if you iterate this multiple times
 vec2 quantize(vec2 rot) {
 	rot *= u_resolution;
 	rot = rot - fract(rot);
@@ -58,10 +61,15 @@ void main( void ) {
 
 	// Rotate by theta. 
 	// Notice how we are attempting to replace time dependent rotation with state depenendent.
-	float theta = M_2PI * 0.001;
+	float theta = M_2PI * 0.0007;
 	vec2 rot_pos = rotate2D(pos, vec2(0.5,0.5), theta);
-	rot_pos = quantize(rot_pos);
+	if ( u_bang == 1) {
+		rot_pos = rotate2D(pos, vec2(0.5,0.5), 0.999*theta);
+		for(int i = 0; i < 2; i++)
+			rot_pos = quantize(rot_pos);
+	}
 	new_pix = texture2D(u_state, rot_pos);
+	new_pix.a *= 1.0045;
     gl_FragColor = new_pix;
 
 }
