@@ -66,7 +66,7 @@ function draw() {
 		state.pop()
 	}
 
-	if (random(0,1) < 0.0016) {
+	if (random(0,1) < 0.008) {
 		bang = 1
 		counter = 0
 	}
