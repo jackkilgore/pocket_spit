@@ -26,20 +26,22 @@ vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
 
 void main( void ) {
     vec2 pos = gl_FragCoord.xy/u_resolution.xy;
-
+	pos = vec2(pos.x,1.0-pos.y);
 	vec4 new_pix;
-	// Return state with no transformations applied.
-	if (u_bang == 0) {
-		new_pix = texture2D(u_state, pos);
-	}
-	// Do feedback chain here:
-	else {
-		// Rotate by theta. 
-		// Notice how we are attempting to replace time dependent rotation with state depenendent.
-		float theta = 0.1;
-		vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.5), theta);
-		new_pix = texture2D(u_state, rot_pos);
-	}
+	// // Return state with no transformations applied.
+	// if (u_bang == 0) {
+	// 	new_pix = texture2D(u_state, pos);
+	// }
+	// // Do feedback chain here:
+	// else {
+		
+	// }
+
+	// Rotate by theta. 
+	// Notice how we are attempting to replace time dependent rotation with state depenendent.
+	float theta = 0.1 * M_2PI;
+	vec2 rot_pos = rotateUVmatrix(pos, vec2(0.5,0.5), theta);
+	new_pix = texture2D(u_state, pos);
 
     gl_FragColor = new_pix;
 

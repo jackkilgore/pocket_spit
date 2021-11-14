@@ -115,7 +115,7 @@
 					"numoutlets" : 2,
 					"outlettype" : [ "jit_matrix", "" ],
 					"patching_rect" : [ 48.320387125015259, 154.0, 119.0, 22.0 ],
-					"text" : "jit.noise 1 char 20 20"
+					"text" : "jit.noise 1 char 10 10"
 				}
 
 			}

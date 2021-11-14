@@ -9,6 +9,7 @@ function preload() {
 	distort_s = loadShader('assets/basic.vert',
 							'assets/distort.frag')
 }
+
 function setup() {
 	pixelDensity(1)
 	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
@@ -45,29 +46,32 @@ function draw() {
 	if (int(millis()) % 1000 < 100) {
 		bang = 1
 	}
+	bang = 1
 
 	background(220)
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
 	distort_s.setUniform('u_state', state)
 	distort_s.setUniform('u_timeS', millis()/1000)
-	distort_s.setUniform('u_bang', bang)
+	//distort_s.setUniform('u_bang', bang)
 
 	// Run shader: use state to create some output
 	screen.shader(distort_s)
-	screen.rect(0,0,width,height)
-
+	screen.push()
+	screen.translate(-screen.width/2,-screen.height/2)
+	screen.rect(0,0,screen.width,screen.height)
+	screen.pop()
 	// Write screen output to ~the~ screen.
-	image(screen,0,0,width,height)
+	image(state,0,0,width,height)
 
 	// Write screen output to state.
 	// FAILURE: This doesn't seem to be copying anything new into state.
-	state.copy(screen,
-		-screen.width/2,-screen.height/2,
-		screen.width,screen.height,
-		0,0,
-		state.width,state.height)
-	state.updatePixels()
+	// state.copy(screen,
+	// 	-screen.width/2,-screen.height/2,
+	// 	screen.width,screen.height,
+	// 	0,0,
+	// 	state.width,state.height)
+	state.image(screen, 0, 0)
 	
 	bang = 0
 }
