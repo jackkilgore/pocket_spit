@@ -3,8 +3,11 @@ let state
 let seed
 let tmp
 let SEED_RES = [10,10]
-let CANVAS_RES = [800,500]
+let CANVAS_RES = [640,480]
 let bang = 0
+
+let camera
+let snapshot
 
 function preload() {
 	distort_s = loadShader('assets/basic.vert',
@@ -13,9 +16,12 @@ function preload() {
 function setup() {
 	pixelDensity(1)
 	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
+	camera = createCapture(VIDEO)
+	camera.hide()
 
 	// This will run the shader
 	screen = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+	screen.textureMode(NORMAL)
 
 	// This will maintain state
 	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
@@ -31,24 +37,7 @@ function setup() {
 	}
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
-	tmp.line(tmp.width/2,tmp.height/2, tmp.width, tmp.height)
-	tmp.line(tmp.width/3, tmp.width/2, 3*tmp.width/4, 4*tmp.height/5)
-	tmp.line(tmp.width/4, 0, tmp.width/4, tmp.height)
-	tmp.line(4*tmp.width/5, tmp.height/4, 4.5*tmp.width/5, 3.6*tmp.height/4)
-	tmp.line(4*tmp.width/5, tmp.height/7, 4.2*tmp.width/5, tmp.height/16)
-	tmp.line(4*tmp.width/5, tmp.height/18, 4.4*tmp.width/5, tmp.height/6)
-	// Load seed image into the state
-	// tmp.loadPixels();
-	// let scale = [SEED_RES[0] / state.width, SEED_RES[1] / state.height];
-	// for (i = 0; i < tmp.width; i++) {
-	//   for (j = 0; j < tmp.height; j++) {
-	// 	tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
-	//   }
-	// }
-	// tmp.updatePixels();
-	
-	
-	//tmp.line(0, 0, tmp.width, tmp.height)
+	tmp.image(camera)
 	
 	state.push()
 	state.translate(-state.width/2, -state.height/2)
@@ -59,7 +48,7 @@ function setup() {
 let counter = 1000
 function draw() {
 	// Trigger running every second.
-	if (int(millis()) % 100 < 100) {
+	if (int(millis()) % 1000 < 100) {
 		state.push()
 		state.translate(-state.width/2, -state.height/2)
 		state.image(tmp, 0, 0);
@@ -97,6 +86,16 @@ function draw() {
 	counter += 1
 
 	// DRAW
-	background(220)
+	background(30)
 	image(screen,0,0,width,height)
+
+}
+
+function keyReleased() {
+	// tmp.tint(255,110)
+	// tmp.image(camera,0,0)
+	state.push()
+	state.translate(-state.width/2, -state.height/2)
+	state.image(camera, 0, 0)
+	state.pop()
 }

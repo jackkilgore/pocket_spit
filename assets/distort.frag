@@ -61,15 +61,10 @@ void main( void ) {
 
 	// Rotate by theta. 
 	// Notice how we are attempting to replace time dependent rotation with state depenendent.
-	float theta = M_2PI * 0.0007;
+	float theta = M_2PI * 0.0002;
 	vec2 rot_pos = rotate2D(pos, vec2(0.5,0.5), theta);
-	if ( u_bang == 1) {
-		rot_pos = rotate2D(pos, vec2(0.5,0.5), 0.999*theta);
-		for(int i = 0; i < 2; i++)
-			rot_pos = quantize(rot_pos);
-	}
 	new_pix = texture2D(u_state, rot_pos);
-	new_pix.a *= 1.0045;
+	new_pix.a *= 1.0;
     gl_FragColor = new_pix;
 
 }
