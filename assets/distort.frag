@@ -36,6 +36,12 @@ vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
       + pivot;
 }
 
+// Wrap
+vec2 getNeighbor(vec2 pos, int distx, int disty) {
+	vec2 incr = 1./u_resolution;
+	return vec2(mod(pos.x + incr.x*float(distx),1.0), mod(pos.y+incr.y*float(disty),1.0));
+}
+
 // I think this is broken
 // Reason: output is different if you iterate this multiple times
 vec2 quantize(vec2 rot) {
@@ -57,14 +63,17 @@ vec4 blend(vec4 left, vec4 right)
 void main( void ) {
     vec2 pos = gl_FragCoord.xy/u_resolution.xy;
 	pos.y = 1.0 - pos.y;
-	vec4 new_pix;
+	vec4 new_pix_0, new_pix_1, out_pix;
 
 	// Rotate by theta. 
 	// Notice how we are attempting to replace time dependent rotation with state depenendent.
-	float theta = M_2PI * 0.0002;
-	vec2 rot_pos = rotate2D(pos, vec2(0.5,0.5), theta);
-	new_pix = texture2D(u_state, rot_pos);
-	new_pix.a *= 1.0;
-    gl_FragColor = new_pix;
+	float theta = M_2PI * 0.0007;
+
+	vec2 neigh_pos = getNeighbor(pos, int(20. * sin(u_timeS)),int(50. * sin(u_timeS)));
+	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta);
+	new_pix_0 = texture2D(u_state, neigh_pos);
+	new_pix_1 = texture2D(u_state, pos);
+	out_pix = mix(new_pix_0,new_pix_1,0.5);
+    gl_FragColor = out_pix;
 
 }
