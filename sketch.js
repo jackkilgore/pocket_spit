@@ -13,6 +13,7 @@ function preload() {
 	distort_s = loadShader('assets/basic.vert',
 							'assets/distort.frag')
 }
+
 function setup() {
 	pixelDensity(1)
 	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
@@ -47,7 +48,7 @@ function setup() {
 
 let counter = 1000
 function draw() {
-	// Trigger running every second.
+	// Metro: trigger event every second.
 	if (int(millis()) % 1000 < 100) {
 		state.push()
 		state.translate(-state.width/2, -state.height/2)
@@ -63,12 +64,13 @@ function draw() {
 	if(counter < 200) {
 		bang = 1
 	}
+	bang = 1
 
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
 	distort_s.setUniform('u_state', state)
 	distort_s.setUniform('u_timeS', millis()/1000)
-	distort_s.setUniform('u_bang', bang)
+	//distort_s.setUniform('u_bang', bang)
 
 	// Run shader: use state to create some output
 	screen.shader(distort_s)
