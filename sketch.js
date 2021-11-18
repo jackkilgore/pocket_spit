@@ -2,7 +2,7 @@ let distort_s
 let state
 let seed
 let tmp
-let SEED_RES = [10,10]
+let SEED_RES = [100,100]
 let CANVAS_RES = [640,480]
 let bang = 0
 
@@ -38,7 +38,16 @@ function setup() {
 	}
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
-	tmp.image(camera)
+	// Load seed image into the state
+	tmp.loadPixels();
+	let scale = [SEED_RES[0] / state.width, SEED_RES[1] / state.height];
+	for (i = 0; i < tmp.width; i++) {
+	  for (j = 0; j < tmp.height; j++) {
+		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
+	  }
+	}
+	tmp.updatePixels();
+	// tmp.image(camera)
 	
 	state.push()
 	state.translate(-state.width/2, -state.height/2)
@@ -49,11 +58,12 @@ function setup() {
 let counter = 1000
 function draw() {
 	// Metro: trigger event every second.
-	if (int(millis()) % 100 < 100) {
-		state.push()
-		state.translate(-state.width/2, -state.height/2)
-		state.image(camera, 0, 0);
-		state.pop()
+	if (int(millis()) % 1000 < 100) {
+		// state.push()
+		// state.translate(-state.width/2, -state.height/2)
+		// tmp.blend(camera,0,0)
+		// state.image(tmp, 0, 0)
+		// state.pop()
 	}
 
 	if (random(0,1) < 0.008) {
