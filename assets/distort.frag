@@ -45,6 +45,67 @@ vec2 quantize(vec2 rot) {
 	return rot;
 }
 
+vec4 laplace() {
+  vec2 st = gl_FragCoord.xy/u_resolution.xy;
+  st = st/1.0;
+  vec2 incr = 1./u_resolution.xy/1.;
+  vec4 sum = vec4(0.);
+  sum += texture2D(u_state,st) * -1.0;
+  
+  // Wrapping logic
+  float left = incr.x*2.;
+  float right = incr.x*2.;
+  float up = incr.y;
+  float down = incr.y;
+  if (st.x - left < 0.) {
+    left = 0.;
+  }
+  if (st.x + right > 1.) {
+    right = 0.;
+  }
+  if (st.y + up > 1.) {
+    up = 0.;
+  }
+  if (st.y - down < 0.) {
+    down = 0.;
+  }
+  
+  sum += 
+    texture2D(u_state,st 
+              - vec2(left,0.)
+  ) * 0.2;
+  sum += 
+    texture2D(u_state,st 
+              + vec2(right,0.)
+  ) * 0.2;
+  sum += 
+    texture2D(u_state,st 
+              - vec2(0.,down)
+  ) * 0.2;
+  sum += 
+    texture2D(u_state,st 
+              + vec2(0.,up)
+  ) * 0.2;
+  
+  sum += 
+    texture2D(u_state,st 
+              - vec2(left,down)
+  ) * 0.05;
+  sum += 
+    texture2D(u_state,st 
+              - vec2(left,-up)
+  ) * 0.05;
+  sum += 
+    texture2D(u_state,st 
+              + vec2(right,up)
+  ) * 0.05;
+  sum += 
+    texture2D(u_state,st 
+              + vec2(right,-down)
+  ) * 0.05;
+  return sum;
+}
+
 // Alpha blend. Currently unused.
 vec4 blend(vec4 left, vec4 right)
 {
@@ -62,9 +123,9 @@ void main( void ) {
 	// Rotate by theta. 
 	// Notice how we are attempting to replace time dependent rotation with state depenendent.
 	float theta = M_2PI * 0.0002;
-	vec2 rot_pos = rotate2D(pos, vec2(0.5,0.5), theta);
-	new_pix = texture2D(u_state, rot_pos);
-	new_pix.a *= 1.0;
+	// vec2 rot_pos = rotate2D(pos, vec2(0.5,0.5), theta);
+	new_pix = texture2D(u_state, pos);
+	new_pix -= (laplace()) * 0.1;
     gl_FragColor = new_pix;
 
 }

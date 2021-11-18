@@ -38,7 +38,7 @@ function setup() {
 	}
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
-	tmp.image(camera)
+	tmp.image(camera,0,0)
 	
 	state.push()
 	state.translate(-state.width/2, -state.height/2)
