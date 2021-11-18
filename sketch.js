@@ -1,5 +1,6 @@
 let distort_s
 let state
+let canvas
 let seed
 let tmp
 let SEED_RES = [10,10]
@@ -12,7 +13,7 @@ function preload() {
 }
 function setup() {
 	pixelDensity(1)
-	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
+	canvas = createCanvas(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 
 	// This will run the shader
 	screen = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
@@ -54,6 +55,11 @@ function setup() {
 	state.translate(-state.width/2, -state.height/2)
 	state.image(tmp, 0, 0);
 	state.pop()
+
+	// Undocumented function. Does it work?
+	state_tex = canvas.getTexture(state)
+	state_tex.setInterpolation(NEAREST, NEAREST)
+	state_tex.setWrapMode(CLAMP, CLAMP);
 }
 
 let counter = 1000
@@ -77,9 +83,9 @@ function draw() {
 
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
-	distort_s.setUniform('u_state', state)
 	distort_s.setUniform('u_timeS', millis()/1000)
 	distort_s.setUniform('u_bang', bang)
+	distort_s.setUniform('u_state', state)
 
 	// Run shader: use state to create some output
 	screen.shader(distort_s)
@@ -98,5 +104,8 @@ function draw() {
 
 	// DRAW
 	background(220)
+	push()
+	translate(-state.width/2, -state.height/2)
 	image(screen,0,0,width,height)
+	pop()
 }
