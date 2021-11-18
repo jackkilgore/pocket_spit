@@ -3,7 +3,7 @@ let state
 let canvas
 let seed
 let tmp
-let SEED_RES = [10,10]
+let SEED_RES = [8,5]
 let CANVAS_RES = [800,500]
 let bang = 0
 
@@ -27,7 +27,10 @@ function setup() {
 		seed[i] = []
 		for (j = 0; j < SEED_RES[1]; j++) {
 			rand = floor(random(0,256))
-			seed[i][j] = color(rand,rand,rand,255)
+			rand1 = floor(random(0,256))
+			rand2 = floor(random(0,256))
+			rand3 = floor(random(255,256))
+			seed[i][j] = color(rand,rand,rand,rand3)
 		}
 	}
 
@@ -50,23 +53,31 @@ function setup() {
 	state.translate(-state.width/2, -state.height/2)
 	state.image(tmp, 0, 0);
 	state.pop()
-
-	// Undocumented function. Does it work?
-	state_tex = canvas.getTexture(state)
-	state_tex.setInterpolation(NEAREST, NEAREST) // NEAREST | LINEAR
-	state_tex.setWrapMode(MIRROR, MIRROR); // CLAMP | REPEAT | MIRROR
 }
 
 let counter = 1000
 function draw() {
 	// Trigger running every second.
-	if (int(millis()) % 100 < 100) {
+	if (int(millis()) % 1000 < 100) {
+		state.stroke(0)
+		if(random(1) < 0.5)
+			state.stroke(255)
+		state.push()
+		state.translate(-state.width/2, -state.height/2)
+		// state.line(0,0,random(width),random(height))
+		state.pop()
 		// state.push()
 		// state.translate(-state.width/2, -state.height/2)
 		// state.image(tmp, 0, 0);
 		// state.pop()
 		bang = 1
 	}
+
+	// State's interpolation mode
+	// Undocumented function. Does it work? no
+	state_tex = canvas.getTexture(state)
+	state_tex.setInterpolation(NEAREST, NEAREST) // NEAREST | LINEAR
+	state_tex.setWrapMode(REPEAT, REPEAT); // CLAMP | REPEAT | MIRROR
 
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
