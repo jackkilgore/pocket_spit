@@ -53,8 +53,8 @@ function setup() {
 
 	// Undocumented function. Does it work?
 	state_tex = canvas.getTexture(state)
-	state_tex.setInterpolation(NEAREST, NEAREST)
-	state_tex.setWrapMode(CLAMP, CLAMP);
+	state_tex.setInterpolation(NEAREST, NEAREST) // NEAREST | LINEAR
+	state_tex.setWrapMode(MIRROR, MIRROR); // CLAMP | REPEAT | MIRROR
 }
 
 let counter = 1000
