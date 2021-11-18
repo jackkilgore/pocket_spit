@@ -32,21 +32,16 @@ function setup() {
 	}
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
-	tmp.line(tmp.width/2,tmp.height/2, tmp.width, tmp.height)
-	tmp.line(tmp.width/3, tmp.width/2, 3*tmp.width/4, 4*tmp.height/5)
-	tmp.line(tmp.width/4, 0, tmp.width/4, tmp.height)
-	tmp.line(4*tmp.width/5, tmp.height/4, 4.5*tmp.width/5, 3.6*tmp.height/4)
-	tmp.line(4*tmp.width/5, tmp.height/7, 4.2*tmp.width/5, tmp.height/16)
-	tmp.line(4*tmp.width/5, tmp.height/18, 4.4*tmp.width/5, tmp.height/6)
+	
 	// Load seed image into the state
-	// tmp.loadPixels();
-	// let scale = [SEED_RES[0] / state.width, SEED_RES[1] / state.height];
-	// for (i = 0; i < tmp.width; i++) {
-	//   for (j = 0; j < tmp.height; j++) {
-	// 	tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
-	//   }
-	// }
-	// tmp.updatePixels();
+	tmp.loadPixels();
+	let scale = [SEED_RES[0] / state.width, SEED_RES[1] / state.height];
+	for (i = 0; i < tmp.width; i++) {
+	  for (j = 0; j < tmp.height; j++) {
+		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
+	  }
+	}
+	tmp.updatePixels();
 	
 	
 	//tmp.line(0, 0, tmp.width, tmp.height)
@@ -66,18 +61,10 @@ let counter = 1000
 function draw() {
 	// Trigger running every second.
 	if (int(millis()) % 100 < 100) {
-		state.push()
-		state.translate(-state.width/2, -state.height/2)
-		state.image(tmp, 0, 0);
-		state.pop()
-	}
-
-	if (random(0,1) < 0.008) {
-		bang = 1
-		counter = 0
-	}
-
-	if(counter < 200) {
+		// state.push()
+		// state.translate(-state.width/2, -state.height/2)
+		// state.image(tmp, 0, 0);
+		// state.pop()
 		bang = 1
 	}
 
