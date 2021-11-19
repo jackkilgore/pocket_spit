@@ -59,11 +59,10 @@ let counter = 1000
 function draw() {
 	// Metro: trigger event every second.
 	if (int(millis()) % 1000 < 100) {
-		// state.push()
-		// state.translate(-state.width/2, -state.height/2)
-		// tmp.blend(camera,0,0)
-		// state.image(tmp, 0, 0)
-		// state.pop()
+		state.push()
+		state.translate(-state.width/2, -state.height/2)
+		// state.line(0,0,state.width,random(state.height))
+		state.pop()
 	}
 
 	if (random(0,1) < 0.008) {

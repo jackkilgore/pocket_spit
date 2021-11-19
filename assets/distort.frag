@@ -133,18 +133,20 @@ void main( void ) {
 
 	// Rotate by theta. 
 	// Notice how we are attempting to replace time dependent rotation with state depenendent.
-	float theta = M_2PI * 0.000003;
+	float theta = M_2PI * 0.00003;
 
+	// PARAM, injects more movement
 	vec2 neigh_pos = getNeighbor(pos, int(2. * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)));
 
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta);
 	pos = rotate2D(pos, vec2(0.5,0.5), theta);
-	neigh_pos = zoom(neigh_pos, vec2(0.5,0.5), sin(u_timeS*M_2PI * .01)*0.005);
+	neigh_pos = zoom(neigh_pos, vec2(0.5,0.5), sin(u_timeS*M_2PI * .01)*0.003); // ZOOMER
 	pos = zoom(pos, vec2(0.5,0.5), 0.005);
 
 	new_pix_0 = texture2D(u_state, neigh_pos);
 	new_pix_1 = texture2D(u_state, pos);
-	out_pix = new_pix_0 - (laplace() * (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2)));
+	out_pix = mix(new_pix_0,new_pix_1,0.0) - (laplace() * (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2)));
+	// out_pix.a *= 0.99;
     gl_FragColor = out_pix;
 
 }
