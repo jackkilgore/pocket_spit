@@ -2,7 +2,7 @@ let distort_s
 let state
 let seed
 let tmp
-let SEED_RES = [100,100]
+let SEED_RES = [2,2]
 let CANVAS_RES = [640,480]
 let bang = 0
 
@@ -33,6 +33,8 @@ function setup() {
 		seed[i] = []
 		for (j = 0; j < SEED_RES[1]; j++) {
 			rand = floor(random(0,256))
+			rand1 = floor(random(rand - 5,rand + 5))
+			rand2 = floor(random(rand1 - 5,rand1 + 5))
 			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
