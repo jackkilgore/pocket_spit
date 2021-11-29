@@ -3,7 +3,7 @@ let state
 let seed
 let tmp
 let SEED_RES = [2,2]
-let CANVAS_RES = [640,480]
+let CANVAS_RES = [800,600]
 let bang = 0
 
 let camera
@@ -17,8 +17,8 @@ function preload() {
 function setup() {
 	pixelDensity(1)
 	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
-	camera = createCapture(VIDEO)
-	camera.hide()
+	// camera = createCapture(VIDEO)
+	// camera.hide()
 
 	// This will run the shader
 	screen = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
@@ -60,12 +60,12 @@ function setup() {
 let counter = 1000
 function draw() {
 	// Metro: trigger event every second.
-	if (int(millis()) % 1000 < 100) {
-		state.push()
-		state.translate(-state.width/2, -state.height/2)
-		// state.line(0,0,state.width,random(state.height))
-		state.pop()
-	}
+	// if (int(millis()) % 1000 < 100) {
+	// 	state.push()
+	// 	state.translate(-state.width/2, -state.height/2)
+	// 	// state.line(0,0,state.width,random(state.height))
+	// 	state.pop()
+	// }
 
 	if (random(0,1) < 0.008) {
 		bang = 1
@@ -107,8 +107,8 @@ function draw() {
 function keyReleased() {
 	// tmp.tint(255,110)
 	// tmp.image(camera,0,0)
-	state.push()
-	state.translate(-state.width/2, -state.height/2)
-	state.image(camera, 0, 0)
-	state.pop()
+	// state.push()
+	// state.translate(-state.width/2, -state.height/2)
+	// state.image(camera, 0, 0)
+	// state.pop()
 }
