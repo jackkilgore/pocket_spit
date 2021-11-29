@@ -154,13 +154,13 @@ void main( void ) {
 	float blob_factor = 10.;
 	float scale_factor = 1.5;
 	vec2 wrap_ceiling = vec2(0.2 + 0.1 * new_pix_1.x,1.2 + 0.1 * new_pix_1.w); //0.2, 1.2 (weights of noise)
-	wrap_ceiling.x = wrap_ceiling.x + wrap_ceiling.x * (0.9 * sin(u_timeS*M_2PI * .1)); // try running these in the sketch, just one calculation
+	wrap_ceiling.x = wrap_ceiling.x + wrap_ceiling.x * (0.9 * sin(u_timeS*M_2PI * .1));
 	wrap_ceiling.y = wrap_ceiling.y + wrap_ceiling.y * (0.9 * sin(u_timeS*M_2PI * .11));
 
 	// PARAM, injects more movement
 	vec2 neigh_pos = getNeighbor(pos, int(1. * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)),wrap_ceiling);
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta);
-	neigh_pos = zoom(neigh_pos, vec2(0.5,0.5), sin(u_timeS*M_2PI * .01) * 0.004); // faster zoom == less busy patterns
+	neigh_pos = zoom(neigh_pos, vec2(0.5,0.5), sin(u_timeS*M_2PI * .01) * -0.05); // faster zoom == less busy patterns
 
 	
 
