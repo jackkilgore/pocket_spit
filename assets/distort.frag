@@ -133,6 +133,7 @@ vec4 laplace(float blobby, float scale) {
 	return sum;
 }
 
+// lerp: processing
 vec2 zoom(vec2 pos, vec2 center, float amount) {
 	vec2 diff = pos - center;
 	return pos + ((-1.0*amount) * diff);
@@ -144,29 +145,28 @@ void main( void ) {
 	vec4 new_pix_0, new_pix_1, out_pix;
 
 	// Rotate by theta. 
-	float theta = M_2PI * 0.0001;
+	float theta = M_2PI * 0.00001;
 
 	
-	pos = zoom(pos, vec2(0.5,0.5), 0.005); // -0.05 goes off, 0.005 for classic
+	pos = zoom(pos, vec2(sin(pos.x),0.5), 0.005); // -0.05 goes off, 0.005 for classic
   	pos = rotate2D(pos, vec2(0.5,0.5), theta);
-  	new_pix_1 = texture2D(u_state, pos);
+  	new_pix_1 = texture2D(u_state, pos); // stealing another pixels memory
 
 
-	float blob_factor = 10.;
-	float scale_factor = 1.5 ; //* new_pix_1.x
-	vec2 wrap_ceiling = vec2(0.2 + 0.2 * new_pix_1.x,1.2 + 1.2 * new_pix_1.w); //0.2, 1.2 (weights of noise)
+	float blob_factor = 100. * new_pix_1.x;
+	float scale_factor = 4.5  * new_pix_1.x;
+
+	vec2 wrap_ceiling = vec2(0.2 + 1.1 * new_pix_1.x,0.5 + 0.1 * new_pix_1.w); //0.2, 1.2 (weights of noise)
 	wrap_ceiling.x = wrap_ceiling.x + wrap_ceiling.x * (0.9 * u_lfos[0]);
 	wrap_ceiling.y = wrap_ceiling.y + wrap_ceiling.y * (0.9 * u_lfos[1]);
 
 	// PARAM, injects more movement
-	vec2 neigh_pos = getNeighbor(pos, int(10. * new_pix_1.x * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)),wrap_ceiling);
+	vec2 neigh_pos = getNeighbor(pos, int(1. * new_pix_1.w * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)),wrap_ceiling);
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta);
-	neigh_pos = zoom(neigh_pos, vec2(0.5,0.5), sin(u_timeS*M_2PI * .01) * 1.0*  (2.0 * new_pix_1.x - 1.0)); // faster zoom == less busy patterns
-
-	
+	neigh_pos = zoom(neigh_pos, vec2(new_pix_1.x,0.5), sin(u_timeS*M_2PI * .01) * 1.0*  (2.0 * new_pix_1.x - 1.0)); // faster zoom == less busy patterns
 
 	new_pix_0 = texture2D(u_state, neigh_pos);
-	out_pix = mix(new_pix_0,new_pix_1,0.0)
+	out_pix = mix(new_pix_0,new_pix_1,sin(u_timeS*M_2PI * 1.)*0.2) // MODULATE MIX
 	- (laplace(blob_factor, scale_factor) 
 	  * (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2)));
 	// out_pix.a *= 0.996;

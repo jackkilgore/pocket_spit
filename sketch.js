@@ -2,12 +2,13 @@ let distort_s
 let state
 let seed
 let tmp
-let SEED_RES = [2,2]
+let SEED_RES = [100,100]
 let CANVAS_RES = [800,600]
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
 let lfos
+let test_state
 
 let camera
 let snapshot
@@ -37,6 +38,11 @@ function setup() {
 	}
 
 	// Build a random seed image
+	// Karl: Try hsv
+	// Pau: try post-processing filtering
+	// Pau: flatten 3d color to a path through a 3d space
+		// Pau: ColorGraph
+		// Karl: try helix
 	seed = []
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
@@ -47,6 +53,7 @@ function setup() {
 			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
+	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(120,122,121,255)
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
 	// Load seed image into the state
@@ -57,6 +64,7 @@ function setup() {
 		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
 	  }
 	}
+	test_state = tmp[0]
 	tmp.updatePixels();
 	// tmp.image(camera)
 	
@@ -64,10 +72,10 @@ function setup() {
 	state.translate(-state.width/2, -state.height/2)
 	state.image(tmp, 0, 0);
 	state.pop()
-
 }
 
 let counter = 1000
+let seed_again = 0
 function draw() {
 	// Get time
 	let time = millis()/1000
@@ -103,6 +111,27 @@ function draw() {
 	state.push()
 	state.translate(-state.width/2, -state.height/2)
 	state.image(screen, 0, 0);
+	state.pop()
+
+	state.loadPixels()
+	state.push()
+	state.translate(-state.width/2, -state.height/2)
+	if (state[0] === test_state) {
+		seed_again += 1
+	} else {
+		seed_again = 0
+	}
+	if( seed_again === 200) {
+		seed_again = 0
+		rand = floor(random(0,256))
+		rand1 = floor(random(rand - 5,rand + 5))
+		rand2 = floor(random(rand1 - 5,rand1 + 5))
+		// state.fill(rand,rand1,rand2,255)
+		// state.noStroke()
+		// state.rect(width/2,height/2,10,10)
+		state.image(tmp, 0, 0)
+	}
+	test_state = state[0]
 	state.pop()
 
 	bang = 0
