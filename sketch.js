@@ -4,7 +4,10 @@ let seed
 let tmp
 let SEED_RES = [2,2]
 let CANVAS_RES = [800,600]
+let M_2PI = 6.283185307179586
 let bang = 0
+let NUM_LFOS = 5
+let lfos
 
 let camera
 let snapshot
@@ -26,6 +29,12 @@ function setup() {
 
 	// This will maintain state
 	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+
+	// Initialize LFOs
+	lfos = []
+	for(i = 0; i < NUM_LFOS; i++) {
+		lfos[i] = 0.0
+	}
 
 	// Build a random seed image
 	seed = []
@@ -55,19 +64,19 @@ function setup() {
 	state.translate(-state.width/2, -state.height/2)
 	state.image(tmp, 0, 0);
 	state.pop()
+
 }
 
 let counter = 1000
 function draw() {
-	// Metro: trigger event every second.
-	// if (int(millis()) % 1000 < 100) {
-	// 	state.push()
-	// 	state.translate(-state.width/2, -state.height/2)
-	// 	// state.line(0,0,state.width,random(state.height))
-	// 	state.pop()
-	// }
+	// Get time
+	let time = millis()/1000
+	// Compute lfos
+	lfos[0] = sin(time*M_2PI*0.1)
+	lfos[1] = sin(time*M_2PI*0.11)
+	
 
-	if (random(0,1) < 0.008) {
+	if (random(0,1) < 0.08) {
 		bang = 1
 		counter = 0
 	}
@@ -80,7 +89,8 @@ function draw() {
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
 	distort_s.setUniform('u_state', state)
-	distort_s.setUniform('u_timeS', millis()/1000)
+	distort_s.setUniform('u_timeS', time)
+	distort_s.setUniform('u_lfos', lfos)
 	//distort_s.setUniform('u_bang', bang)
 
 	// Run shader: use state to create some output
