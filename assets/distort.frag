@@ -96,7 +96,6 @@ vec4 laplace(float blobby, float scale) {
 	if (st.y - down < 0.) {
 	down = 0.;
 	}
-
 	sum += 
 	texture2D(u_state,st 
 				- vec2(left,0.)
@@ -139,6 +138,7 @@ vec2 zoom(vec2 pos, vec2 center, float amount) {
 	return pos + ((-1.0*amount) * diff);
 }
 
+// add a noise function
 void main( void ) {
 	vec2 pos = gl_FragCoord.xy/u_resolution.xy;
 	pos.y = 1.0 - pos.y;
@@ -166,7 +166,7 @@ void main( void ) {
 	neigh_pos = zoom(neigh_pos, vec2(new_pix_1.x,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * new_pix_1.x - 1.0)); // faster zoom == less busy patterns
 
 	new_pix_0 = texture2D(u_state, neigh_pos);
-	out_pix = mix(new_pix_0,new_pix_1,sin(u_timeS*M_2PI * (0.7 + (0.15 * (new_pix_0.x - 0.5))))*0.9) // MODULATE MIX
+	out_pix = mix(new_pix_0,new_pix_1,sin(u_timeS*M_2PI * (0.7 + (1.15 * (new_pix_0.x - 0.5))))*0.9) // MODULATE MIX
 	- (laplace(blob_factor, scale_factor) 
 	  * (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2)));
 	// out_pix.a *= 0.996;
