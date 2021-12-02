@@ -12,7 +12,7 @@ uniform vec2 u_resolution;
 uniform float u_timeS;
 uniform int u_bang;
 uniform int u_toggle;
-uniform float u_lfos[5]; 
+uniform float u_lfos; 
 
 //src: https://godotengine.org/qa/41400/simple-texture-rotation-shader
 vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
@@ -149,7 +149,7 @@ void main( void ) {
 
 	
 	pos = zoom(pos, vec2(sin(pos.x),0.5), 0.005); // -0.05 goes off, 0.005 for classic
-  	pos = rotate2D(pos, vec2(0.5,0.5), theta);
+  	pos = rotate2D(pos, vec2(sin(pos.y),0.5), theta);
   	new_pix_1 = texture2D(u_state, pos); // stealing another pixels memory
 
 
@@ -157,16 +157,16 @@ void main( void ) {
 	float scale_factor = 4.5  * new_pix_1.x;
 
 	vec2 wrap_ceiling = vec2(0.2 + 1.1 * new_pix_1.x,0.5 + 0.1 * new_pix_1.w); //0.2, 1.2 (weights of noise)
-	wrap_ceiling.x = wrap_ceiling.x + wrap_ceiling.x * (0.9 * u_lfos[0]);
-	wrap_ceiling.y = wrap_ceiling.y + wrap_ceiling.y * (0.9 * u_lfos[1]);
+	wrap_ceiling.x = wrap_ceiling.x + wrap_ceiling.x;
+	wrap_ceiling.y = wrap_ceiling.y + wrap_ceiling.y;
 
 	// PARAM, injects more movement
 	vec2 neigh_pos = getNeighbor(pos, int(1. * new_pix_1.w * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)),wrap_ceiling);
-	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta);
-	neigh_pos = zoom(neigh_pos, vec2(new_pix_1.x,0.5), sin(u_timeS*M_2PI * .01) * 1.0*  (2.0 * new_pix_1.x - 1.0)); // faster zoom == less busy patterns
+	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * new_pix_1.x);
+	neigh_pos = zoom(neigh_pos, vec2(new_pix_1.x,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * new_pix_1.x - 1.0)); // faster zoom == less busy patterns
 
 	new_pix_0 = texture2D(u_state, neigh_pos);
-	out_pix = mix(new_pix_0,new_pix_1,sin(u_timeS*M_2PI * 1.)*0.2) // MODULATE MIX
+	out_pix = mix(new_pix_0,new_pix_1,sin(u_timeS*M_2PI * (0.7 + (0.15 * (new_pix_0.x - 0.5))))*0.9) // MODULATE MIX
 	- (laplace(blob_factor, scale_factor) 
 	  * (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2)));
 	// out_pix.a *= 0.996;

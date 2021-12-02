@@ -98,7 +98,7 @@ function draw() {
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
 	distort_s.setUniform('u_state', state)
 	distort_s.setUniform('u_timeS', time)
-	distort_s.setUniform('u_lfos', lfos)
+	distort_s.setUniform('u_lfos', lfos[0])
 	//distort_s.setUniform('u_bang', bang)
 
 	// Run shader: use state to create some output
@@ -116,6 +116,8 @@ function draw() {
 	state.loadPixels()
 	state.push()
 	state.translate(-state.width/2, -state.height/2)
+
+	// Reseed
 	if (state[0] === test_state) {
 		seed_again += 1
 	} else {
@@ -123,13 +125,10 @@ function draw() {
 	}
 	if( seed_again === 200) {
 		seed_again = 0
-		rand = floor(random(0,256))
-		rand1 = floor(random(rand - 5,rand + 5))
-		rand2 = floor(random(rand1 - 5,rand1 + 5))
 		// state.fill(rand,rand1,rand2,255)
 		// state.noStroke()
 		// state.rect(width/2,height/2,10,10)
-		state.image(tmp, 0, 0)
+		// state.image(tmp, 0, 0)
 	}
 	test_state = state[0]
 	state.pop()
