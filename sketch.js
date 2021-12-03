@@ -50,7 +50,7 @@ function setup() {
 			rand = floor(random(0,256))
 			rand1 = floor(random(rand - 5,rand + 5))
 			rand2 = floor(random(rand1 - 5,rand1 + 5))
-			seed[i][j] = color(rand1,rand2,rand,255)
+			seed[i][j] = color(rand,rand1,rand2,255)
 		}
 	}
 	seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(194,25,64,255)
