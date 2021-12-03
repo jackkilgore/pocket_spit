@@ -57,119 +57,123 @@ vec2 quantize(vec2 rot) {
 	return rot;
 }
 
-// Alpha blend. Currently unused.
-vec4 blend(vec4 left, vec4 right)
-{
-	float alpha_left = left.a;
-	float alpha_right = 1. - alpha_left;
-	vec4 n_right = vec4(right.xyz, alpha_right);
-	return left + n_right;
-}
-
 // Blobby: a higher value has bigger blobs
 // Sweet Spot: [0.9,50]
 // Default: 10.0
 // Scale: kind of mysterious. Higher takes longer to see and bigger blobs. Lower is more zoomed out
 // Default: 1.5
 // Sweet Spot: [0.2,4.0]
-vec4 laplace(float blobby, float scale) {
-	vec2 st = gl_FragCoord.xy/u_resolution.xy;
-	st = st/scale; // neat
+vec4 laplace(vec2 pos, float blobby, float scale) {
+	pos = pos/scale; // neat
 	vec2 incr = 1./u_resolution.xy*blobby; // makes wavy PARAM TODO, bigger blobs as constant gets smaller
 	vec4 sum = vec4(0.);
-	sum += texture2D(u_state,st) * -1.0;
+	sum += texture2D(u_state,pos) * -1.0;
 
 	// Wrapping logic
 	float left = incr.x*2.;
 	float right = incr.x*2.;
 	float up = incr.y;
 	float down = incr.y;
-	if (st.x - left < 0.) {
+	if (pos.x - left < 0.) {
 	left = 0.;
 	}
-	if (st.x + right > 1.) {
+	if (pos.x + right > 1.) {
 	right = 0.;
 	}
-	if (st.y + up > 1.) {
+	if (pos.y + up > 1.) {
 	up = 0.;
 	}
-	if (st.y - down < 0.) {
+	if (pos.y - down < 0.) {
 	down = 0.;
 	}
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				- vec2(left,0.)
 	) * 0.2;
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				+ vec2(right,0.)
 	) * 0.2;
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				- vec2(0.,down)
 	) * 0.2;
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				+ vec2(0.,up)
 	) * 0.2;
 
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				- vec2(left,down)
 	) * 0.05;
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				- vec2(left,-up)
 	) * 0.05;
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				+ vec2(right,up)
 	) * 0.05;
 	sum += 
-	texture2D(u_state,st 
+	texture2D(u_state,pos 
 				+ vec2(right,-down)
 	) * 0.05;
 	return sum;
 }
 
-// lerp: processing
-vec2 zoom(vec2 pos, vec2 center, float amount) {
-	vec2 diff = pos - center;
+// vec4 neighbor_influence(vec2 pos, float weight) {
+
+// }
+
+// Alias for mix
+vec2 zoom(vec2 pos, vec2 point, float amount) {
+	vec2 diff = pos - point;
 	return pos + ((-1.0*amount) * diff);
+}
+
+float modulate_sine(float orig, float weight, float max_width) {
+	return orig + weight * sin(M_2PI*u_timeS*1.0 + 0.0) * (max_width);
 }
 
 // add a noise function
 void main( void ) {
-	vec2 pos = gl_FragCoord.xy/u_resolution.xy;
-	pos.y = 1.0 - pos.y;
-	vec4 new_pix_0, new_pix_1, out_pix;
+	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
+	orig_pos.y = 1.0 - orig_pos.y;
+
+	vec2 first_move = orig_pos;
+	vec4 color_2, color_1, color_0, my_next_color;
+
+	color_0 = texture2D(u_state, orig_pos);
 
 	// Rotate by theta. 
 	float theta = M_2PI * 0.00001;
-
 	
-	pos = zoom(pos, vec2(sin(pos.x),0.5), 0.005); // -0.05 goes off, 0.005 for classic
-  	pos = rotate2D(pos, vec2(sin(pos.y),0.5), theta);
-  	new_pix_1 = texture2D(u_state, pos); // stealing another pixels memory
+	first_move = mix(first_move, vec2(color_0.x,color_0.x), -0.005);
+  	first_move = rotate2D(first_move, vec2(sin(first_move.y),0.5), theta);
+  	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
 
 
-	float blob_factor = 100. * new_pix_1.x;
-	float scale_factor = 4.5  * new_pix_1.x;
-
-	vec2 wrap_ceiling = vec2(0.2 + 1.1 * new_pix_1.x,0.5 + 0.1 * new_pix_1.w); //0.2, 1.2 (weights of noise)
-	wrap_ceiling.x = wrap_ceiling.x + wrap_ceiling.x;
-	wrap_ceiling.y = wrap_ceiling.y + wrap_ceiling.y;
+	float blob_factor = 100. * color_1.x;
+	float scale_factor = 4.5  * color_1.x;
+	vec2 wrap_ceiling = vec2(1.0,1.0); //0.2, 1.2 (weights of noise)
 
 	// PARAM, injects more movement
-	vec2 neigh_pos = getNeighbor(pos, int(1. * new_pix_1.w * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)),wrap_ceiling);
-	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * new_pix_1.x);
-	neigh_pos = zoom(neigh_pos, vec2(new_pix_1.x,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * new_pix_1.x - 1.0)); // faster zoom == less busy patterns
+	vec2 neigh_pos = getNeighbor(first_move, int(1. * color_1.w * sin(M_2PI * u_timeS * 0.12)),int(1.* sin(u_timeS)),wrap_ceiling);
+	
+	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * color_1.x);
+	neigh_pos = mix(neigh_pos, vec2(color_1.x,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * color_1.x - 1.0));
 
-	new_pix_0 = texture2D(u_state, neigh_pos);
-	out_pix = mix(new_pix_0,new_pix_1,sin(u_timeS*M_2PI * (0.7 + (1.15 * (new_pix_0.x - 0.5))))*0.9) // MODULATE MIX
-	- (laplace(blob_factor, scale_factor) 
-	  * (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2)));
-	// out_pix.a *= 0.996;
-  gl_FragColor = out_pix;
+	color_2 = texture2D(u_state, neigh_pos);
 
+	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*0.9;
+	my_next_color = mix(color_2,color_1,mix_amount);
+
+	float neighbors_weight = (0.3 * (sin(u_timeS * M_2PI * 0.01) + 1.2));
+
+	vec4 neighbors = laplace(gl_FragCoord.xy/u_resolution.xy,blob_factor, scale_factor) * neighbors_weight;
+
+	my_next_color -= neighbors;
+
+  	gl_FragColor = my_next_color;
 }
