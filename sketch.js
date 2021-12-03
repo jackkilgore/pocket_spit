@@ -3,7 +3,7 @@ let state
 let seed
 let tmp
 let SEED_RES = [100,100]
-let CANVAS_RES = [800,600]
+let CANVAS_RES = [2920,1080]
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
@@ -53,7 +53,7 @@ function setup() {
 			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
-	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(120,122,121,255)
+	seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
 	// Load seed image into the state
@@ -124,7 +124,7 @@ function draw() {
 		seed_again = 0
 	}
 	if( seed_again === 200) {
-		seed_again = 0
+		// seed_again = 0
 		// state.fill(rand,rand1,rand2,255)
 		// state.noStroke()
 		// state.rect(width/2,height/2,10,10)
