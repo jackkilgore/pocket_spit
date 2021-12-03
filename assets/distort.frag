@@ -166,7 +166,7 @@ void main( void ) {
 
 	float blob_factor = 100. * color_1.x; //10 or 100
 	float scale_factor = 4.5  * color_1.z;
-	vec2 wrap_ceiling = vec2(0.2,0.2); //0.11, 0.2 (weights of noise)
+	vec2 wrap_ceiling = vec2(1.0,0.07); //0.11, 0.2 (weights of noise)
 
 	// PARAM, injects more movement
 	int dist_x = int(1. * color_1.w * sin(M_2PI * u_timeS * 0.12));
