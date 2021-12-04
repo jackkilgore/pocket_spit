@@ -3,7 +3,7 @@ let state
 let seed
 let tmp
 let SEED_RES = [100,100]
-let CANVAS_RES = [2920,1080]
+let CANVAS_RES = [800,500]
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
