@@ -158,7 +158,7 @@ void main( void ) {
 	float theta = M_2PI * 0.00001;
 	
 	float zoom_amount_1 = -0.001;
-	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.0989, 0.01, -1);
+	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.0989, 0.01, -1);
 	first_move = mix(first_move, vec2(color_0.x,color_0.z), zoom_amount_1);
   	first_move = rotate2D(first_move, vec2(sin(first_move.y),sin(first_move.x)), theta);
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
