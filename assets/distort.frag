@@ -158,7 +158,7 @@ void main( void ) {
 	float theta = M_2PI * 0.00001;
 	
 	float zoom_amount_1 = 0.0001;
-	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.0989, 0.01, -1);
+	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.0989, 0.01, 1);
 	first_move = mix(first_move, vec2(color_0.x,color_0.z), zoom_amount_1);
   	first_move = rotate2D(first_move, vec2(sin(first_move.y),sin(first_move.x)), theta);
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
@@ -166,7 +166,7 @@ void main( void ) {
 
 	float blob_factor = 50. * color_1.x; //10 or 100
 	float scale_factor = 4.5 * color_1.z;
-	vec2 wrap_ceiling = vec2(0.3333333,0.11); //0.11, 0.2 (weights of noise)
+	vec2 wrap_ceiling = vec2(0.11,0.2); //0.11, 0.2 (weights of noise)
 	wrap_ceiling.x += 0.001 * (color_1.x - 0.5);
 	wrap_ceiling.y += 0.003 * (color_1.y - 0.5);
 

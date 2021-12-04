@@ -53,7 +53,7 @@ function setup() {
 			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
-	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(194,25,64,255)
+	seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(194,25,64,255)
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
 	// Load seed image into the state
