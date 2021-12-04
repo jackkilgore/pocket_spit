@@ -47,10 +47,15 @@ function setup() {
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
 		for (j = 0; j < SEED_RES[1]; j++) {
-			rand = floor(random(0,256))
-			rand1 = floor(random(rand - 5,rand + 5))
-			rand2 = floor(random(rand1 - 5,rand1 + 5))
-			seed[i][j] = color(rand,rand,rand,255)
+			if(random(1) < 0.00) {
+				rand = floor(random(0,256))
+				rand1 = floor(random(rand - 5,rand + 5))
+				rand2 = floor(random(rand1 - 5,rand1 + 5))
+				seed[i][j] = color(rand,rand1,rand2,255)
+			} else {
+				rand = floor(random(0,256))
+				seed[i][j] = color(rand,rand,rand,255)
+			}
 		}
 	}
 	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)

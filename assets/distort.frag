@@ -148,7 +148,7 @@ float modulate_sine(float orig, float weight, float freq, float phase, int polar
 void main( void ) {
 	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
 	orig_pos.y = 1.0 - orig_pos.y;
-	// orig_pos.x = 1.0 - orig_pos.x;
+	orig_pos.x = 1.0 - orig_pos.x;
 
 	vec2 first_move = orig_pos;
 	vec4 color_2, color_1, color_0, my_next_color;
@@ -158,15 +158,15 @@ void main( void ) {
 	// Rotate by theta. 
 	float theta = M_2PI * 0.0101 * color_0.x;
 	
-	float zoom_amount_1 = -0.0001;
+	float zoom_amount_1 = 0.001;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.0989, 0.01, -1);
-	first_move = mix(first_move, vec2(color_0.x,color_0.x), zoom_amount_1);
+	first_move = mix(first_move, vec2(color_0.x,color_0.y), zoom_amount_1);
   	first_move = rotate2D(first_move, vec2(sin(first_move.x),0.5), theta);
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
 
 
 	float blob_factor = 0.2 * color_1.x; //10 or 100
-	float scale_factor = 4.5  * color_1.x;
+	float scale_factor = 0.5  * color_1.x;
 	vec2 wrap_ceiling = vec2(.07,1.0); //0.11, 0.2 (weights of noise)
 
 	// PARAM, injects more movement
