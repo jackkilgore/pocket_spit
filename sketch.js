@@ -1,9 +1,11 @@
 let distort_s
 let state
+let canvas
 let seed
 let tmp
 let SEED_RES = [100,100]
-let CANVAS_RES = [3840,2160]
+// let CANVAS_RES = [800,500]
+let CANVAS_RES = [1920,1080]
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
@@ -13,14 +15,24 @@ let test_state
 let camera
 let snapshot
 
+const capturer = new CCapture({
+	framerate: 60,
+	format: "webm",
+	name: "movie",
+	quality: 100,
+	verbose: true,
+  });
+  
+
 function preload() {
 	distort_s = loadShader('assets/basic.vert',
 							'assets/distort.frag')
 }
 
 function setup() {
+	frameRate(60)
 	pixelDensity(1)
-	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
+	can = createCanvas(CANVAS_RES[0],CANVAS_RES[1])
 	// camera = createCapture(VIDEO)
 	// camera.hide()
 
@@ -81,10 +93,13 @@ function setup() {
 }
 
 let counter = 1000
+let frameCount = 1
 let seed_again = 0
-let time = 0
 let delta_time = 1/60.0
+let time = 0 * delta_time
 function draw() {
+	if (time === 0) capturer.start()
+
 	// Get time
 	// let time = millis()/1000
 	// Compute lfos
@@ -94,7 +109,6 @@ function draw() {
 
 	if (random(0,1) < 0.08) {
 		bang = 1
-		counter = 0
 	}
 
 	if(counter < 200) {
@@ -149,15 +163,20 @@ function draw() {
 	background(30)
 	image(screen,0,0,width,height)
 
-	// save("test.png")
+	// Save
+	capturer.capture(can.canvas)
 
+	if(frameCount % 60 === 0) {
+		capturer.stop()
+		capturer.save()
+		capturer.start();
+	}
+
+	frameCount += 1
 }
 
 function keyReleased() {
-	// tmp.tint(255,110)
-	// tmp.image(camera,0,0)
-	// state.push()
-	// state.translate(-state.width/2, -state.height/2)
-	// state.image(camera, 0, 0)
-	// state.pop()
+	noLoop()
+    capturer.stop()
+    capturer.save()
 }
