@@ -30,7 +30,7 @@ function preload() {
 }
 
 function setup() {
-	frameRate(60)
+	frameRate(5)
 	pixelDensity(1)
 	can = createCanvas(CANVAS_RES[0],CANVAS_RES[1])
 	// camera = createCapture(VIDEO)
@@ -95,26 +95,16 @@ function setup() {
 let counter = 1000
 let frameCount = 1
 let seed_again = 0
-let delta_time = 1/60.0
+let delta_time = 1/5.0
 let time = 0 * delta_time
 function draw() {
-	if (time === 0) capturer.start()
+	// if (time === 0) capturer.start()
 
 	// Get time
 	// let time = millis()/1000
 	// Compute lfos
 	lfos[0] = sin(time*M_2PI*0.1)
 	lfos[1] = sin(time*M_2PI*0.11)
-	
-
-	if (random(0,1) < 0.08) {
-		bang = 1
-	}
-
-	if(counter < 200) {
-		bang = 1
-	}
-	bang = 1
 
 	// Set Uniforms
 	distort_s.setUniform('u_resolution', [screen.width, screen.height])
@@ -158,25 +148,24 @@ function draw() {
 	bang = 0
 	counter += 1
 	time += delta_time
+	frameCount += 1
 
 	// DRAW
 	background(30)
 	image(screen,0,0,width,height)
 
 	// Save
-	capturer.capture(can.canvas)
+	// capturer.capture(can.canvas)
 
-	if(frameCount % 60 === 0) {
-		capturer.stop()
-		capturer.save()
-		capturer.start();
-	}
-
-	frameCount += 1
+	// if(frameCount % 60 === 0) {
+	// 	capturer.stop()
+	// 	capturer.save()
+	// 	capturer.start();
+	// }
 }
 
 function keyReleased() {
-	noLoop()
-    capturer.stop()
-    capturer.save()
+	// noLoop()
+    // capturer.stop()
+    // capturer.save()
 }
