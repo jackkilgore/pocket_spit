@@ -156,33 +156,33 @@ void main( void ) {
 	color_0 = texture2D(u_state, orig_pos);
 
 	// Rotate by theta. 
-	float theta = M_2PI * 0.0101 * color_0.x;
+	float theta = M_2PI * 0.00101 * color_0.x;
 	
-	float zoom_amount_1 = 0.001;
-	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.0989, 0.01, -1);
+	float zoom_amount_1 = -0.01;
+	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.0989, 0.01, 0);
 	first_move = mix(first_move, vec2(color_0.x,color_0.y), zoom_amount_1);
   	first_move = rotate2D(first_move, vec2(sin(first_move.x),0.5), theta);
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
 
 
-	float blob_factor = 0.2 * color_1.x; //10 or 100
+	float blob_factor = 10.2 * color_1.x; //10 or 100
 	float scale_factor = 0.5  * color_1.x;
-	vec2 wrap_ceiling = vec2(.07,1.0); //0.11, 0.2 (weights of noise)
+	vec2 wrap_ceiling = vec2(1.07,1.0); //0.11, 0.2 (weights of noise)
 
 	// PARAM, injects more movement
 	// Karl: "Wormhole"
 	int dist_x = int(1. * color_1.w * sin(M_2PI * u_timeS * 1.12));
-	int dist_y = int(10.* sin(u_timeS));
+	int dist_y = int(10.* sin(u_timeS * M_2PI * (0.15 + (color_1.x * 0.01 - 0.005))));
 	vec2 neigh_pos = getNeighbor(first_move, dist_x,dist_y,wrap_ceiling);
 	
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * color_1.x);
 	
 	// use to be weighted by 0.01, made it less pencil
-	neigh_pos = mix(neigh_pos, vec2(color_1.x,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * color_1.x - 1.0));
+	neigh_pos = mix(neigh_pos, vec2(sin(neigh_pos.x),sin(neigh_pos.y)), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * color_1.x - 1.0));
 
 	color_2 = texture2D(u_state, neigh_pos);
 
-	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*0.01;
+	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*0.2;
 	my_next_color = mix(color_2,color_1,mix_amount);
 
 	float neighbors_weight = (0.3 * (sin(u_timeS * M_2PI * 0.21) + 1.2));
@@ -190,11 +190,7 @@ void main( void ) {
 	vec4 neighbors = laplace(gl_FragCoord.xy/u_resolution.xy,blob_factor, scale_factor) * neighbors_weight;
 
 	my_next_color -= neighbors;
-	my_next_color.xyz = my_next_color.xyz; //+ vec3(0.0028,0.0028,0.0028);
-  	gl_FragColor = my_next_color;
 
-	// Frag color (position)
-	// `color_1 - color_0` (velocity)
-	gl_FragColor = color_0 + modulate_sine(0.5,0.81,0.1,0.0,1) * (my_next_color - color_0);
+	gl_FragColor = color_0 + modulate_sine(0.5 + my_next_color.x,0.61,0.0891,0.0,1) * (my_next_color - color_0);
 
 }

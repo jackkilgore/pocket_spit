@@ -3,7 +3,7 @@ let state
 let seed
 let tmp
 let SEED_RES = [100,100]
-let CANVAS_RES = [2920,1080]
+let CANVAS_RES = [3840,2160]
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
@@ -77,13 +77,16 @@ function setup() {
 	state.translate(-state.width/2, -state.height/2)
 	state.image(tmp, 0, 0);
 	state.pop()
+
 }
 
 let counter = 1000
 let seed_again = 0
+let time = 0
+let delta_time = 1/60.0
 function draw() {
 	// Get time
-	let time = millis()/1000
+	// let time = millis()/1000
 	// Compute lfos
 	lfos[0] = sin(time*M_2PI*0.1)
 	lfos[1] = sin(time*M_2PI*0.11)
@@ -140,10 +143,13 @@ function draw() {
 
 	bang = 0
 	counter += 1
+	time += delta_time
 
 	// DRAW
 	background(30)
 	image(screen,0,0,width,height)
+
+	// save("test.png")
 
 }
 
