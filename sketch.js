@@ -1,3 +1,6 @@
+// Author: Jack Kilgore
+// Date: 6 December, 2021 
+
 let distort_s
 let state
 let canvas
