@@ -6,7 +6,7 @@ let state
 let canvas
 let seed
 let tmp
-let SEED_RES = [100,100]
+let SEED_RES = [2,2]
 let CANVAS_RES = [800,500]
 // let CANVAS_RES = [1920,1080]
 // let CANVAS_RES = [4096,2160]
