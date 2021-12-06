@@ -44,7 +44,7 @@ function setup() {
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
 		for (j = 0; j < SEED_RES[1]; j++) {
-			if(random(1) < 0.00) {
+			if(random(1) < -1.00) {
 				rand = floor(random(0,256))
 				rand1 = floor(random(rand - 5,rand + 5))
 				rand2 = floor(random(rand1 - 5,rand1 + 5))
