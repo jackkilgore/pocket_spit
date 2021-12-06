@@ -1,3 +1,6 @@
+// Author: Jack Kilgore
+// Date: 6 December, 2021 
+
 let distort_s
 let state
 let canvas
@@ -37,11 +40,6 @@ function setup() {
 	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 
 	// Build a random seed image
-	// Karl: Try hsv
-	// Pau: try post-processing filtering
-	// Pau: flatten 3d color to a path through a 3d space
-		// Pau: ColorGraph
-		// Karl: try helix
 	seed = []
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
