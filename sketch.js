@@ -5,10 +5,11 @@ let seed
 let tmp
 let SEED_RES = [100,100]
 // let CANVAS_RES = [800,500]
-let CANVAS_RES = [1920,1080]
+// let CANVAS_RES = [1920,1080]
+let CANVAS_RES = [4096,2160]
 let M_2PI = 6.283185307179586
-let bang = 0
 let NUM_LFOS = 5
+let FPS = 60
 let lfos
 let test_state
 
@@ -16,8 +17,8 @@ let camera
 let snapshot
 
 const capturer = new CCapture({
-	framerate: 60,
-	format: "webm",
+	framerate: FPS,
+	format: "png",
 	name: "movie",
 	quality: 100,
 	verbose: true,
@@ -30,7 +31,7 @@ function preload() {
 }
 
 function setup() {
-	frameRate(5)
+	frameRate(FPS)
 	pixelDensity(1)
 	can = createCanvas(CANVAS_RES[0],CANVAS_RES[1])
 	// camera = createCapture(VIDEO)
@@ -92,13 +93,12 @@ function setup() {
 
 }
 
-let counter = 1000
-let frameCount = 1
+let frameCount = 0
 let seed_again = 0
-let delta_time = 1/5.0
+let delta_time = 1.0/FPS
 let time = 0 * delta_time
 function draw() {
-	// if (time === 0) capturer.start()
+	if (frameCount === 0) capturer.start()
 
 	// Get time
 	// let time = millis()/1000
@@ -145,27 +145,28 @@ function draw() {
 	test_state = state[0]
 	state.pop()
 
-	bang = 0
-	counter += 1
 	time += delta_time
-	frameCount += 1
 
 	// DRAW
 	background(30)
 	image(screen,0,0,width,height)
 
-	// Save
-	// capturer.capture(can.canvas)
+	// // Save
+	capturer.capture(can.canvas)
 
-	// if(frameCount % 60 === 0) {
-	// 	capturer.stop()
-	// 	capturer.save()
-	// 	capturer.start();
-	// }
+	if(frameCount % 60 === 0 && frameCount > 0) {
+		capturer.stop()
+		capturer.save()
+		capturer.start();
+	}
+	frameCount += 1
+
 }
 
 function keyReleased() {
-	// noLoop()
-    // capturer.stop()
-    // capturer.save()
+	if(key === 's') {
+		noLoop()
+		capturer.stop()
+		capturer.save()
+	}
 }
