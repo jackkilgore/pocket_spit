@@ -5,18 +5,8 @@ let seed
 let tmp
 let SEED_RES = [100,100]
 let CANVAS_RES = [800,500]
-// let CANVAS_RES = [1920,1080]
-// let CANVAS_RES = [4096,2160]
 let M_2PI = 6.283185307179586
 let FPS = 60
-
-// const capturer = new CCapture({
-// 	framerate: FPS,
-// 	format: "png",
-// 	name: "movie",
-// 	quality: 100,
-// 	verbose: true,
-//   });
   
 
 function preload() {
@@ -37,27 +27,14 @@ function setup() {
 	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 
 	// Build a random seed image
-	// Karl: Try hsv
-	// Pau: try post-processing filtering
-	// Pau: flatten 3d color to a path through a 3d space
-		// Pau: ColorGraph
-		// Karl: try helix
 	seed = []
 	for (i = 0; i < SEED_RES[0]; i++) {
 		seed[i] = []
 		for (j = 0; j < SEED_RES[1]; j++) {
-			if(random(1) < 0.00) {
-				rand = floor(random(0,256))
-				rand1 = floor(random(rand - 5,rand + 5))
-				rand2 = floor(random(rand1 - 5,rand1 + 5))
-				seed[i][j] = color(rand,rand1,rand2,255)
-			} else {
-				rand = floor(random(0,256))
-				seed[i][j] = color(rand,rand,rand,255)
-			}
+			rand = floor(random(0,256))
+			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
-	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
 	// Load seed image into the state
@@ -105,23 +82,4 @@ function draw() {
 	// DRAW
 	background(30)
 	image(screen,0,0,width,height)
-
-	// // Save
-	// capturer.capture(can.canvas)
-
-	// if(frameCount % 60 === 0 && frameCount > 0) {
-	// 	capturer.stop()
-	// 	capturer.save()
-	// 	capturer.start();
-	// }
-	// frameCount += 1
-
-}
-
-function keyReleased() {
-	// if(key === 's') {
-	// 	noLoop()
-	// 	capturer.stop()
-	// 	capturer.save()
-	// }
 }
