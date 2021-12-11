@@ -3,7 +3,9 @@ let state
 let seed
 let tmp
 let SEED_RES = [100,100]
-let CANVAS_RES = [2920,1080]
+// let CANVAS_RES = [2920,1080]
+let CANVAS_RES = [7680,4320]
+let FRAMERATE = 1
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
@@ -20,6 +22,7 @@ function preload() {
 
 function setup() {
 	pixelDensity(1)
+	frameRate(FRAMERATE)
 	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
 	// camera = createCapture(VIDEO)
 	// camera.hide()
@@ -53,7 +56,7 @@ function setup() {
 			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
-	seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(194,25,64,255)
+	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
 
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
 	// Load seed image into the state
