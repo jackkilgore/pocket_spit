@@ -148,6 +148,7 @@ float modulate_sine(float orig, float weight, float freq, float phase, int polar
 void main( void ) {
 	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
 	orig_pos.y = 1.0 - orig_pos.y;
+	orig_pos.x = 1.0 - orig_pos.x;
 
 	vec2 first_move = orig_pos;
 	vec4 color_2, color_1, color_0, my_next_color;
@@ -171,7 +172,7 @@ void main( void ) {
 	wrap_ceiling.y += 0.003 * (color_1.y - 0.5);
 
 	// PARAM, injects more movement
-	int dist_x = 0; //modulate_sine(0.,10.,0.1,0.0,0);
+	int dist_x = int(modulate_sine(0.,10.,0.1,0.0,0));
 	int dist_y = 1;
 	vec2 neigh_pos = getNeighbor(first_move, dist_x,dist_y,wrap_ceiling);
 	
