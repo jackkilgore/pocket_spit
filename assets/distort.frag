@@ -148,7 +148,7 @@ float modulate_sine(float orig, float weight, float freq, float phase, int polar
 void main( void ) {
 	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
 	orig_pos.y = 1.0 - orig_pos.y;
-	orig_pos.x = 1.0 - orig_pos.x;
+	// orig_pos.x = 1.0 - orig_pos.x;
 
 	vec2 first_move = orig_pos;
 	vec4 color_2, color_1, color_0, my_next_color;
@@ -158,7 +158,7 @@ void main( void ) {
 	// Rotate by theta. 
 	float theta = M_2PI * 0.00001;
 	
-	float zoom_amount_1 = -0.01;
+	float zoom_amount_1 = 0.01;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.0989, 0.01, 1);
 	first_move = mix(first_move, vec2(color_0.x,color_0.z), zoom_amount_1);
   	first_move = rotate2D(first_move, vec2(sin(first_move.y),sin(first_move.x)), theta);
@@ -167,13 +167,13 @@ void main( void ) {
 
 	float blob_factor = 50. * color_1.x; //10 or 100
 	float scale_factor = 4.5 * color_1.z;
-	vec2 wrap_ceiling = vec2(1.11,0.2); //0.11, 0.2 (weights of noise)
+	vec2 wrap_ceiling = vec2(1.11 + ((color_1.x - 0.5) * 0.3),0.2 + ((color_1.y - 0.5) * 0.2)); //0.11, 0.2 (weights of noise)
 	wrap_ceiling.x += 0.001 * (color_1.x - 0.5);
 	wrap_ceiling.y += 0.003 * (color_1.y - 0.5);
 
 	// PARAM, injects more movement
-	int dist_x = int(modulate_sine(0.,10.,0.1,0.0,0));
-	int dist_y = 1;
+	int dist_x = int(modulate_sine(0.,0. * color_1.x,0.1,0.0,0));
+	int dist_y = int(modulate_sine(0.,0. * color_1.y,0.1,0.0,0));
 	vec2 neigh_pos = getNeighbor(first_move, dist_x,dist_y,wrap_ceiling);
 	
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * color_1.y);
