@@ -2,7 +2,8 @@ let distort_s
 let state
 let seed
 let tmp
-let SEED_RES = [50,50]
+let SEED_RES = [20,20]
+// let CANVAS_RES = [800,500]
 let CANVAS_RES = [4096,2160]
 // let CANVAS_RES = [2920,1080]
 let M_2PI = 6.283185307179586

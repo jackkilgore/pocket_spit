@@ -147,7 +147,7 @@ float modulate_sine(float orig, float weight, float freq, float phase, int polar
 // add a noise function
 void main( void ) {
 	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
-	// orig_pos.y = 1.0 - orig_pos.y;
+	orig_pos.y = 1.0 - orig_pos.y;
 	// orig_pos.x = 1.0 - orig_pos.x;
 
 	vec2 first_move = orig_pos;
@@ -166,14 +166,14 @@ void main( void ) {
 
 
 	vec2 blob_factor; 
-	blob_factor.x = 50. * color_1.x; //10 or 50
-	blob_factor.y = 10. * color_1.x;
+	blob_factor.x = 10. * color_1.x; //10 or 50
+	blob_factor.y = 2. * color_1.y;
 	vec2 scale_factor;
 	scale_factor.x = 4.5 * color_1.z;
-	scale_factor.y = 4.5 * color_1.z;
+	scale_factor.y = -10.5 * color_1.z;
 
 	// vec2 wrap_ceiling = vec2(1.11 + ((color_1.x - 0.5) * 0.3),0.1 + ((color_1.y - 0.5) * 0.01)); //0.11, 0.2 (weights of noise)
-	vec2 wrap_ceiling = vec2(1.11,0.11); //0.11
+	vec2 wrap_ceiling = vec2(0.11,1.11); //0.11
 	wrap_ceiling.x += 0.001 * (color_1.x - 0.5);
 	wrap_ceiling.y += 0.003 * (color_1.y - 0.5);
 
@@ -185,7 +185,7 @@ void main( void ) {
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * color_1.y);
 	
 	// use to be weighted by 0.01, made it less pencil
-	neigh_pos = mix(neigh_pos, vec2(color_1.z,0.5), sin(u_timeS*M_2PI * .01) * -0.01*  (2.0 * color_1.z - 1.0));
+	neigh_pos = mix(neigh_pos, vec2(color_1.z,color_1.x), sin(u_timeS*M_2PI * .01) * 0.001*  (2.0 * color_1.z - 1.0));
 
 	color_2 = texture2D(u_state, neigh_pos);
 
@@ -195,7 +195,8 @@ void main( void ) {
 	float neighbors_weight = (0.3 * (sin(u_timeS * M_2PI * 0.01 + M_PI) + 1.2));
 
 	vec4 neighbors = laplace(gl_FragCoord.xy/u_resolution.xy,blob_factor, scale_factor) * neighbors_weight;
-
 	my_next_color -= neighbors;
-  	gl_FragColor = my_next_color;
+
+	float delta_t = modulate_sine(1.0, 0.5, 0.1, 0.0, 1);
+  	gl_FragColor = color_0 + delta_t * (my_next_color - color_0);
 }
