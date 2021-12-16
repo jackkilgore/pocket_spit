@@ -156,11 +156,13 @@ void main( void ) {
 	color_0 = texture2D(u_state, orig_pos);
 
 	// Rotate by theta. 
-	float theta = M_2PI * 0.000000;
+	float theta = M_2PI * 0.001000;
 	
 	float zoom_amount_1 = -0.001;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.0989, 0.01, 1);
-	first_move = mix(first_move, vec2(color_0.x,color_0.z), zoom_amount_1);
+
+	vec2 zoom_point = vec2(mod(color_0.x,0.11), color_0.z);
+	first_move = mix(first_move, zoom_point, zoom_amount_1);
   	first_move = rotate2D(first_move, vec2(sin(first_move.y),sin(first_move.x)), theta);
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
 
@@ -173,7 +175,7 @@ void main( void ) {
 	scale_factor.y = -10.5 * color_1.z;
 
 	// vec2 wrap_ceiling = vec2(1.11 + ((color_1.x - 0.5) * 0.3),0.1 + ((color_1.y - 0.5) * 0.01)); //0.11, 0.2 (weights of noise)
-	vec2 wrap_ceiling = vec2(0.11,1.11); //0.11
+	vec2 wrap_ceiling = vec2(1.11,1.11); //0.11
 	wrap_ceiling.x += 0.001 * (color_1.x - 0.5);
 	wrap_ceiling.y += 0.003 * (color_1.y - 0.5);
 
