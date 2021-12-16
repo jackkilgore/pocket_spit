@@ -63,9 +63,9 @@ vec2 quantize(vec2 rot) {
 // Scale: kind of mysterious. Higher takes longer to see and bigger blobs. Lower is more zoomed out
 // Default: 1.5
 // Sweet Spot: [0.2,4.0]
-vec4 laplace(vec2 pos, float blobby, float scale) {
+vec4 laplace(vec2 pos, vec2 blobby, vec2 scale) {
 	pos = pos/scale; // neat
-	vec2 incr = 1./u_resolution.xy*blobby; // makes wavy PARAM TODO, bigger blobs as constant gets smaller
+	vec2 incr = 1./u_resolution.xy*blobby.xy; // makes wavy PARAM TODO, bigger blobs as constant gets smaller
 	vec4 sum = vec4(0.);
 	sum += texture2D(u_state,pos) * -1.0;
 
@@ -147,7 +147,7 @@ float modulate_sine(float orig, float weight, float freq, float phase, int polar
 // add a noise function
 void main( void ) {
 	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
-	orig_pos.y = 1.0 - orig_pos.y;
+	// orig_pos.y = 1.0 - orig_pos.y;
 	// orig_pos.x = 1.0 - orig_pos.x;
 
 	vec2 first_move = orig_pos;
@@ -156,7 +156,7 @@ void main( void ) {
 	color_0 = texture2D(u_state, orig_pos);
 
 	// Rotate by theta. 
-	float theta = M_2PI * 0.000001;
+	float theta = M_2PI * 0.000000;
 	
 	float zoom_amount_1 = -0.001;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.0989, 0.01, 1);
@@ -165,16 +165,21 @@ void main( void ) {
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
 
 
-	float blob_factor = 50. * color_1.x; //10 or 50
-	float scale_factor = 4.5 * color_1.z;
+	vec2 blob_factor; 
+	blob_factor.x = 50. * color_1.x; //10 or 50
+	blob_factor.y = 10. * color_1.x;
+	vec2 scale_factor;
+	scale_factor.x = 4.5 * color_1.z;
+	scale_factor.y = 4.5 * color_1.z;
+
 	// vec2 wrap_ceiling = vec2(1.11 + ((color_1.x - 0.5) * 0.3),0.1 + ((color_1.y - 0.5) * 0.01)); //0.11, 0.2 (weights of noise)
-	// vec2 wrap_ceiling = vec2(1.11,0.11);
+	vec2 wrap_ceiling = vec2(1.11,0.11); //0.11
 	wrap_ceiling.x += 0.001 * (color_1.x - 0.5);
 	wrap_ceiling.y += 0.003 * (color_1.y - 0.5);
 
 	// PARAM, injects more movement
-	int dist_x = int(modulate_sine(0.,0. * color_1.x,0.1,0.0,0));
-	int dist_y = int(modulate_sine(0.,0. * color_1.y,0.1,0.0,0));
+	int dist_x = 0;
+	int dist_y = 0;
 	vec2 neigh_pos = getNeighbor(first_move, dist_x,dist_y,wrap_ceiling);
 	
 	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * color_1.y);
