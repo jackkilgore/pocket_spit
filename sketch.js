@@ -4,7 +4,7 @@ let seed
 let tmp
 let SEED_RES = [5,5]
 let CANVAS_RES = [7680,4320]
-let FRAME_RATE = 60
+let FRAME_RATE = 1
 let M_2PI = 6.283185307179586
 let bang = 0
 let NUM_LFOS = 5
