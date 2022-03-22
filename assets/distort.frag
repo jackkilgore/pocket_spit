@@ -1,3 +1,6 @@
+// Author: Jack Kilgore
+// Date: 6 December, 2021 
+
 #define M_PI 3.1415926535897932384626433832795
 #define M_2PI 6.283185307179586
 
@@ -7,27 +10,9 @@ precision mediump int;
 #endif
 
 uniform sampler2D u_state;
-
 uniform vec2 u_resolution;
 uniform float u_timeS;
-uniform int u_bang;
-uniform int u_toggle;
-uniform float u_lfos; 
 
-//src: https://godotengine.org/qa/41400/simple-texture-rotation-shader
-vec2 rotateUVmatrix(vec2 uv, vec2 pivot, float rotation)
-{
-	mat2 rotation_matrix=mat2(  vec2(sin(rotation),-cos(rotation)),
-								vec2(cos(rotation),sin(rotation))
-								);
-	uv -= pivot;
-	uv= uv*rotation_matrix;
-	uv += pivot;
-	return uv;
-}
-
-// I think this is correct....
-// https://en.wikipedia.org/wiki/Rotation_matrix
 vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
 	return
 	  (v - pivot)
@@ -37,15 +22,12 @@ vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
 	  + pivot;
 }
 
-// TODO add some noise
-// Wrap
-// wrap_celing
 // Sweet Spot ([0,1],[0,1])
 // Any value above 1 will clamp instead of wrap
-// Default (0.2,1.2)
-vec2 getNeighbor(vec2 pos, int distx, int disty, vec2 wrap_celing) {
+// Credits to kybyr for the function name
+vec2 wormhole(vec2 pos, float distx, float disty, vec2 wrap_celing) {
 	vec2 incr = 1./u_resolution;
-	return vec2(mod(pos.x + incr.x*float(distx),wrap_celing.x), mod(pos.y+incr.y*float(disty),wrap_celing.y));
+	return vec2(mod(pos.x + incr.x*distx,wrap_celing.x), mod(pos.y+incr.y*disty,wrap_celing.y));
 }
 
 // I think this is broken
@@ -57,15 +39,16 @@ vec2 quantize(vec2 rot) {
 	return rot;
 }
 
+// Laplace
 // Blobby: a higher value has bigger blobs
-// Sweet Spot: [0.9,50]
+// Sweet Spot: (0.0,1000]
 // Default: 10.0
 // Scale: kind of mysterious. Higher takes longer to see and bigger blobs. Lower is more zoomed out
 // Default: 1.5
 // Sweet Spot: [0.2,4.0]
 vec4 laplace(vec2 pos, float blobby, float scale) {
 	pos = pos/scale; // neat
-	vec2 incr = 1./u_resolution.xy*blobby; // makes wavy PARAM TODO, bigger blobs as constant gets smaller
+	vec2 incr = 1./(u_resolution.xy*blobby);
 	vec4 sum = vec4(0.);
 	sum += texture2D(u_state,pos) * -1.0;
 
@@ -122,14 +105,9 @@ vec4 laplace(vec2 pos, float blobby, float scale) {
 	return sum;
 }
 
-// vec4 neighbor_influence(vec2 pos, float weight) {
-
-// }
-
-// Alias for mix
-vec2 zoom(vec2 pos, vec2 point, float amount) {
-	vec2 diff = pos - point;
-	return pos + ((-1.0*amount) * diff);
+vec4 neighbor_influence(vec4 my_color, float weight, vec2 neighborhood, float blobby, float scale) {
+	vec4 neighbors = weight * laplace(neighborhood,blobby,scale);
+	return my_color - neighbors;
 }
 
 float modulate_sine(float orig, float weight, float freq, float phase, int polarity) {
@@ -144,49 +122,93 @@ float modulate_sine(float orig, float weight, float freq, float phase, int polar
 	return orig + weight * siner;
 }
 
-// add a noise function
 void main( void ) {
-	vec2 orig_pos = gl_FragCoord.xy/u_resolution.xy;
-	orig_pos.y = 1.0 - orig_pos.y;
 
-	vec2 first_move = orig_pos;
-	vec4 color_2, color_1, color_0, my_next_color;
+	// Get the color of the current pixel (color_0). 
+	//
+	vec2 pos_0 = gl_FragCoord.xy/u_resolution.xy;
+	pos_0.y = 1.0 - pos_0.y;
+	// pos_0.x = 1.0 - pos_0.x;
+	vec4 color_0 = texture2D(u_state, pos_0);
 
-	color_0 = texture2D(u_state, orig_pos);
-
-	// Rotate by theta. 
-	float theta = M_2PI * 0.000001;
+	// Universal rotation; influenced by color_0. 
+	float theta = M_2PI * 0.0101 * color_0.x;
 	
-	float zoom_amount_1 = -0.01;
-	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.0989, 0.01, -1);
-	first_move = mix(first_move, vec2(color_0.x,color_0.x), zoom_amount_1);
-  	first_move = rotate2D(first_move, vec2(sin(first_move.x),0.5), theta);
-  	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
+	// Get the next color (color_1), influenced by color_0.
+	//
+	vec2 pos_1 = pos_0;
+
+	// The mix here affectively acts like a zoom on a camera.
+	float zoom_amount_1 = 0.0005;
+	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.00989, 0.01, 0);
+	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
+
+	// Rotation
+  	pos_1 = rotate2D(pos_1, vec2(1.5,1.5), theta);
+
+  	vec4 color_1 = texture2D(u_state, pos_1);
 
 
-	float blob_factor = 10. * color_1.x; //10 or 100
-	float scale_factor = 4.5  * color_1.x;
-	vec2 wrap_ceiling = vec2(0.11,0.2); //0.11, 0.2 (weights of noise)
+	// Get the next color (color_2), influenced by color_1.
+	//
+	float dist_x_mod_freq =  0.000012 * color_1.x;
+	float dist_x_mod_weight = 1. * color_1.w;
+	float dist_x = 3.0; 
+	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,0);
 
-	// PARAM, injects more movement
-	int dist_x = 0;
-	int dist_y = 1;
-	vec2 neigh_pos = getNeighbor(first_move, dist_x,dist_y,wrap_ceiling);
+	float dist_y_freq = 0.00005 + (color_1.x * 0.001 - 0.005);
+	float dist_y_weight = 1.;
+	float dist_y = modulate_sine(0.,50.,dist_y_freq, 0.0, 0);
+
+	vec2 wrap_ceiling = vec2(1.5,1.75);
+	vec2 pos_2 = wormhole(pos_1, dist_x,dist_y,wrap_ceiling);
+
+	// Rotation
+	pos_2 = rotate2D(pos_2, vec2(0.05,0.5), theta * color_1.x);
 	
-	neigh_pos = rotate2D(neigh_pos, vec2(0.5,0.5), theta * color_1.y);
-	
-	// use to be weighted by 0.01, made it less pencil
-	neigh_pos = mix(neigh_pos, vec2(color_1.x,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * color_1.x - 1.0));
+	// Another "zoom".
+	float zoom_mod_2_freq = 0.001;
+	float zoom_mod_2_weight = 0.1*(2.0 * color_1.x - 1.0);
+	float zoom_amount_2 = modulate_sine(10.,zoom_mod_2_weight,zoom_mod_2_freq,0.0,0);
+	pos_2 = mix(pos_2, vec2(pos_1.x,pos_1.y), zoom_amount_2);
 
-	color_2 = texture2D(u_state, neigh_pos);
+	vec4 color_2 = texture2D(u_state, pos_2);
 
-	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*0.9;
-	my_next_color = mix(color_2,color_1,mix_amount);
+	// Mix color_1 and color_2. This is the basis for our new pixel color.
+	//
+	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*1.00009;
+	vec4 color_0_next = mix(color_2,color_1,mix_amount);
 
-	float neighbors_weight = (0.3 * (sin(u_timeS * M_2PI * 0.01 + M_PI) + 1.2));
 
-	vec4 neighbors = laplace(gl_FragCoord.xy/u_resolution.xy,blob_factor, scale_factor) * neighbors_weight;
+	// color_0_next will be influenced by some specified neighborhood.
+	//
+	float blob_factor = 0.2 * color_1.x; //10 or 100
+	float scale_factor = 2.005  * color_1.x;
+	vec2 neighborhood = pos_0;
+	neighborhood.y = 1.0 - pos_0.y;
 
-	my_next_color -= neighbors;
-  	gl_FragColor = my_next_color;
+	float neighbors_weight = 0.48;
+	float neighbors_weight_mod_freq = 0.21;
+	float neighbors_weight_mod_weight = 0.4;
+	neighbors_weight = modulate_sine(neighbors_weight,
+						neighbors_weight_mod_weight,
+						neighbors_weight_mod_freq,
+						0.0,
+						0
+					);
+	color_0_next = neighbor_influence(color_0_next,neighbors_weight,
+			neighborhood,
+			blob_factor,
+			scale_factor
+	);
+
+	// We have finally derived the new pixel color.
+	// Perform Euler's Rule.
+	//
+	float dt = 0.025 + color_0_next.x; // dependent on the original pixel
+	float dt_mod_weight = 0.21;
+	float dt_mod_freq = 0.0000891 + sin(color_0.y);
+	dt = modulate_sine(dt,dt_mod_weight,dt_mod_freq, 0.0,1);
+	gl_FragColor = color_0 + dt * (color_0_next - color_0);
+	gl_FragColor *= 1.000;
 }
