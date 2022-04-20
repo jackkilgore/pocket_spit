@@ -1,11 +1,13 @@
 let distort_s
-let state
+let lerp_s
+let state0
+let state1
 let seed
 let tmp
 let SEED_RES = [16,9]
 // let CANVAS_RES = [800,500]
-// let CANVAS_RES = [2920,1080]
-let CANVAS_RES = [7680,4320]
+let CANVAS_RES = [1920,1080]
+// let CANVAS_RES = [7680,4320]
 let FRAMERATE = 60
 let M_2PI = 6.283185307179586
 let bang = 0
@@ -19,6 +21,8 @@ let snapshot
 function preload() {
 	distort_s = loadShader('assets/basic.vert',
 							'assets/distort.frag')
+	lerp_s = loadShader('assets/basic.vert',
+							'assets/interp_textures.frag')
 }
 
 function setup() {
@@ -33,7 +37,11 @@ function setup() {
 	screen.textureMode(NORMAL)
 
 	// This will maintain state
-	state = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+	state0 = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+	state0.textureMode(NORMAL)
+
+	state1 = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+	state1.textureMode(NORMAL)
 
 	// Initialize LFOs
 	lfos = []
@@ -62,88 +70,95 @@ function setup() {
 	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
 	// Load seed image into the state
 	tmp.loadPixels();
-	let scale = [SEED_RES[0] / state.width, SEED_RES[1] / state.height];
+	let scale = [SEED_RES[0] / state0.width, SEED_RES[1] / state0.height];
 	for (i = 0; i < tmp.width; i++) {
 	  for (j = 0; j < tmp.height; j++) {
 		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
 	  }
 	}
-	test_state = tmp[0]
 	tmp.updatePixels();
 	// tmp.image(camera)
 	
-	state.push()
-	state.translate(-state.width/2, -state.height/2)
-	state.image(tmp, 0, 0);
-	state.pop()
+	state0.push()
+	state0.translate(-state0.width/2, -state0.height/2)
+	state0.image(tmp, 0, 0);
+	state0.pop()
 }
 
-let counter = 1000
-let seed_again = 0
-function draw() {
-	// Get time
-	let time = millis()/1000
+let delta_time = 1.0/FRAMERATE
+let time = 0 * delta_time
+
+// Use state to compute the global screen
+function compute(state_in, state_out) {
 	// Compute lfos
 	lfos[0] = sin(time*M_2PI*0.1)
 	lfos[1] = sin(time*M_2PI*0.11)
-	
-
-	if (random(0,1) < 0.08) {
-		bang = 1
-		counter = 0
-	}
-
-	if(counter < 200) {
-		bang = 1
-	}
-	bang = 1
-
 	// Set Uniforms
-	distort_s.setUniform('u_resolution', [screen.width, screen.height])
-	distort_s.setUniform('u_state', state)
+	distort_s.setUniform('u_resolution', [state_in.width, state_in.height])
+	distort_s.setUniform('u_state', state_in)
 	distort_s.setUniform('u_timeS', time)
 	distort_s.setUniform('u_lfos', lfos[0])
 	//distort_s.setUniform('u_bang', bang)
 
-	// Run shader: use state to create some output
+	// Run shader: use state to create some output 
 	screen.shader(distort_s)
 	screen.push()
 	screen.translate(-screen.width/2, -screen.height/2)
 	screen.rect(0,0,width,height)
 	screen.pop()
 
-	state.push()
-	state.translate(-state.width/2, -state.height/2)
-	state.image(screen, 0, 0);
-	state.pop()
+	// // Store screen in state
+	state_out.push()
+	state_out.translate(-state_out.width/2, -state_out.height/2)
+	state_out.image(screen, 0, 0);
+	state_out.pop()
 
-	state.loadPixels()
-	state.push()
-	state.translate(-state.width/2, -state.height/2)
+	time += delta_time
 
-	// Reseed
-	if (state[0] === test_state) {
-		seed_again += 1
-	} else {
-		seed_again = 0
+	return state_out
+}
+
+function interp(stateA, stateB, interp_amount) {
+	lerp_s.setUniform('u_resolution', [screen.width, screen.height])
+	lerp_s.setUniform('u_texA', stateA)
+	lerp_s.setUniform('u_texB', stateB)
+	lerp_s.setUniform('u_interp_amount', interp_amount)
+
+	// Run shader: use state to create some output 
+	screen.shader(lerp_s)
+	screen.push()
+	screen.translate(-screen.width/2, -screen.height/2)
+	screen.rect(0,0,width,height)
+	screen.pop()
+}
+
+
+
+interp_dur = FRAMERATE * 0.25
+curr_interp_frame = 0
+init_frame = true
+function draw() {
+	if (init_frame) {
+		// state0 = compute(state1,state0)
+		state1 = compute(state0,state1)
+		init_frame = false
 	}
-	if( seed_again === 200) {
-		// seed_again = 0
-		// state.fill(rand,rand1,rand2,255)
-		// state.noStroke()
-		// state.rect(width/2,height/2,10,10)
-		// state.image(tmp, 0, 0)
+	if (curr_interp_frame > (interp_dur - 1)) {
+		state0.push()
+		state0.translate(-state0.width/2, -state0.height/2)
+		state0.image(state1, 0, 0);
+		state0.pop()
+		state1 = compute(state0,state1)
+		curr_interp_frame = 0
 	}
-	test_state = state[0]
-	state.pop()
-
-	bang = 0
-	counter += 1
+	interp(state0,state1,curr_interp_frame / interp_dur)
+	
 
 	// DRAW
 	background(30)
 	image(screen,0,0,width,height)
 
+	curr_interp_frame += 1
 }
 
 function keyReleased() {
