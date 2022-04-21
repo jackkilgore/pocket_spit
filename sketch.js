@@ -22,9 +22,9 @@ let test_state
 const capturer = new CCapture({
 	framerate: FRAMERATE,
 	format: "webm",
-	name: "interp_3",
+	name: "interp_4",
 	quality: 80,
-	verbose: true,
+	// verbose: true,
 	autoSaveTime: 1.0,
   });
 
@@ -174,7 +174,7 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 
 
 
-interp_dur = FRAMERATE * 0.14
+interp_dur = FRAMERATE * 0.07 //0.14
 curr_interp_frame = 0
 init_frame = true
 capture_now = true
@@ -215,6 +215,7 @@ function draw() {
 		curr_interp_frame = 0
 	}
 	// lin_interp(state0,state1,curr_interp_frame / interp_dur)
+	// some error here, only colors interpolating but not geometry HMMM
 	cubic_interp(state0,state1,state2,state3,curr_interp_frame / interp_dur)
 	
 

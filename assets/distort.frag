@@ -133,7 +133,7 @@ void main( void ) {
 
 
 	// remove symmetry
-	if(color_0.x > 0.1) {
+	if(color_0.x > 0.001) {
 		pos_0.x = 1.0 - pos_0.x;
 	}
 
@@ -212,7 +212,7 @@ void main( void ) {
 	// Perform Euler's Rule.
 	//
 	float dt = 0.025 + color_0_next.x; // dependent on the original pixel
-	float dt_mod_weight = 0.71;
+	float dt_mod_weight = 0.91;
 	float dt_mod_freq = 0.0000891 + sin(color_0.y);
 	dt = modulate_sine(dt,dt_mod_weight,dt_mod_freq, 0.0,1);
 	gl_FragColor = color_0 + dt * (color_0_next - color_0);
