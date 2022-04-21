@@ -1,13 +1,17 @@
 let distort_s
 let lerp_s
+let cubic_s
 let state0
 let state1
+let state2
+let state3
 let seed
 let tmp
 let SEED_RES = [16,9]
 // let CANVAS_RES = [800,500]
-let CANVAS_RES = [1920,1080]
-// let CANVAS_RES = [7680,4320]
+// let CANVAS_RES = [1920,1080]
+let CANVAS_RES = [3840,2160]
+// let CANVAS_RES = [7680,4320] // 8k
 let FRAMERATE = 60
 let M_2PI = 6.283185307179586
 let bang = 0
@@ -15,22 +19,37 @@ let NUM_LFOS = 5
 let lfos
 let test_state
 
-let camera
-let snapshot
+const capturer = new CCapture({
+	framerate: FRAMERATE,
+	format: "webm",
+	name: "interp_3",
+	quality: 80,
+	verbose: true,
+	autoSaveTime: 1.0,
+  });
+
+function copy_state(state_in, state_out) {
+	state_out.push()
+	state_out.translate(-state_out.width/2, -state_out.height/2)
+	state_out.image(state_in, 0, 0);
+	state_out.pop()
+
+	return state_out
+}
 
 function preload() {
 	distort_s = loadShader('assets/basic.vert',
 							'assets/distort.frag')
 	lerp_s = loadShader('assets/basic.vert',
 							'assets/interp_textures.frag')
+	cubic_s = loadShader('assets/basic.vert',
+							'assets/cubic_interp.frag')
 }
 
 function setup() {
 	pixelDensity(1)
 	frameRate(FRAMERATE)
-	createCanvas(CANVAS_RES[0],CANVAS_RES[1])
-	// camera = createCapture(VIDEO)
-	// camera.hide()
+	global_canvas = createCanvas(CANVAS_RES[0],CANVAS_RES[1])
 
 	// This will run the shader
 	screen = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
@@ -42,6 +61,12 @@ function setup() {
 
 	state1 = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
 	state1.textureMode(NORMAL)
+
+	state2 = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+	state2.textureMode(NORMAL)
+
+	state3 = createGraphics(CANVAS_RES[0],CANVAS_RES[1], WEBGL)
+	state3.textureMode(NORMAL)
 
 	// Initialize LFOs
 	lfos = []
@@ -60,9 +85,9 @@ function setup() {
 		seed[i] = []
 		for (j = 0; j < SEED_RES[1]; j++) {
 			rand = floor(random(0,256))
-			rand1 = floor(random(rand - 5,rand + 5))
-			rand2 = floor(random(rand1 - 5,rand1 + 5))
-			seed[i][j] = color(rand,rand1,rand2,255)
+			rand1 = floor(random(rand - 1,rand + 1))
+			rand2 = floor(random(rand1 - 1,rand1 + 1))
+			seed[i][j] = color(rand,rand,rand,255)
 		}
 	}
 	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
@@ -77,16 +102,15 @@ function setup() {
 	  }
 	}
 	tmp.updatePixels();
-	// tmp.image(camera)
 	
-	state0.push()
-	state0.translate(-state0.width/2, -state0.height/2)
-	state0.image(tmp, 0, 0);
-	state0.pop()
+	state0 = copy_state(tmp,state0)
+	state1 = copy_state(tmp,state1) // TODO ZERO THESE OUT
+	state2 = copy_state(tmp,state2)
+	state3 = copy_state(tmp,state3)
 }
 
 let delta_time = 1.0/FRAMERATE
-let time = 0 * delta_time
+let time = 1 * delta_time
 
 // Use state to compute the global screen
 function compute(state_in, state_out) {
@@ -118,7 +142,7 @@ function compute(state_in, state_out) {
 	return state_out
 }
 
-function interp(stateA, stateB, interp_amount) {
+function lin_interp(stateA, stateB, interp_amount) {
 	lerp_s.setUniform('u_resolution', [screen.width, screen.height])
 	lerp_s.setUniform('u_texA', stateA)
 	lerp_s.setUniform('u_texB', stateB)
@@ -132,26 +156,66 @@ function interp(stateA, stateB, interp_amount) {
 	screen.pop()
 }
 
+function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
+	cubic_s.setUniform('u_resolution', [screen.width, screen.height])
+	cubic_s.setUniform('u_texA', stateA)
+	cubic_s.setUniform('u_texB', stateB)
+	cubic_s.setUniform('u_texC', stateC)
+	cubic_s.setUniform('u_texD', stateD)
+	cubic_s.setUniform('u_interp_amount', interp_amount)
+
+	// Run shader: use state to create some output 
+	screen.shader(cubic_s)
+	screen.push()
+	screen.translate(-screen.width/2, -screen.height/2)
+	screen.rect(0,0,width,height)
+	screen.pop()
+}
 
 
-interp_dur = FRAMERATE * 0.25
+
+interp_dur = FRAMERATE * 0.14
 curr_interp_frame = 0
 init_frame = true
+capture_now = true
+
 function draw() {
 	if (init_frame) {
-		// state0 = compute(state1,state0)
+
+		// Capture logic
+		if (capture_now) {
+			capturer.start()
+		}
+
 		state1 = compute(state0,state1)
+
+
+		// CUBIC
+		state2 = compute(state1,state2)
+		state3 = compute(state2,state3)
+
+
 		init_frame = false
 	}
 	if (curr_interp_frame > (interp_dur - 1)) {
-		state0.push()
-		state0.translate(-state0.width/2, -state0.height/2)
-		state0.image(state1, 0, 0);
-		state0.pop()
-		state1 = compute(state0,state1)
+		// LINEAR
+
+		// state0 = copy_state(state1,state0);
+
+		// state1 = compute(state0,state1)
+
+
+		// CUBIC
+		state0 = copy_state(state1,state0);
+		state1 = copy_state(state2,state1);
+		state2 = copy_state(state3,state2);
+
+		state3 = compute(state2,state3)
+
 		curr_interp_frame = 0
 	}
-	interp(state0,state1,curr_interp_frame / interp_dur)
+	// lin_interp(state0,state1,curr_interp_frame / interp_dur)
+	cubic_interp(state0,state1,state2,state3,curr_interp_frame / interp_dur)
 	
 
 	// DRAW
@@ -159,13 +223,24 @@ function draw() {
 	image(screen,0,0,width,height)
 
 	curr_interp_frame += 1
-}
+	
 
+	// // CAPTURE
+	if(capture_now) {
+		capturer.capture(global_canvas.canvas)
+	}
+
+}
 function keyReleased() {
-	// tmp.tint(255,110)
-	// tmp.image(camera,0,0)
-	// state.push()
-	// state.translate(-state.width/2, -state.height/2)
-	// state.image(camera, 0, 0)
-	// state.pop()
+	if(key === 'g') {
+		capturer.start()
+		capture_now = true
+	}
+
+	if(key === 's') {
+		// noLoop()
+		capturer.stop()
+		capturer.save()
+		capture_now = false
+	}
 }

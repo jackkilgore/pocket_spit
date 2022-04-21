@@ -128,23 +128,29 @@ void main( void ) {
 	//
 	vec2 pos_0 = gl_FragCoord.xy/u_resolution.xy;
 	pos_0.y = 1.0 - pos_0.y;
-	// pos_0.x = 1.0 - pos_0.x;
+	pos_0.x = 1.0 - pos_0.x;
 	vec4 color_0 = texture2D(u_state, pos_0);
 
+
+	// remove symmetry
+	if(color_0.x > 0.1) {
+		pos_0.x = 1.0 - pos_0.x;
+	}
+
 	// Universal rotation; influenced by color_0. 
-	float theta = M_2PI * 0.0101 * color_0.x;
+	float theta = M_2PI * 0.00101 * color_0.x;
 	
 	// Get the next color (color_1), influenced by color_0.
 	//
 	vec2 pos_1 = pos_0;
 
 	// The mix here affectively acts like a zoom on a camera.
-	float zoom_amount_1 = 0.0005;
+	float zoom_amount_1 = 0.005;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.00989, 0.01, 0);
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
 	// Rotation
-  	pos_1 = rotate2D(pos_1, vec2(1.5,1.5), theta);
+  	pos_1 = rotate2D(pos_1, vec2(0.5,0.5), theta);
 
   	vec4 color_1 = texture2D(u_state, pos_1);
 
@@ -153,12 +159,12 @@ void main( void ) {
 	//
 	float dist_x_mod_freq =  0.000012 * color_1.x;
 	float dist_x_mod_weight = 1. * color_1.w;
-	float dist_x = 3.0; 
+	float dist_x = 0.01; 
 	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,0);
 
 	float dist_y_freq = 0.00005 + (color_1.x * 0.001 - 0.005);
-	float dist_y_weight = 1.;
-	float dist_y = modulate_sine(0.,50.,dist_y_freq, 0.0, 0);
+	float dist_y_weight = 10.;
+	float dist_y = modulate_sine(0.,dist_y_weight,dist_y_freq, 0.0, 0);
 
 	vec2 wrap_ceiling = vec2(1.5,1.75);
 	vec2 pos_2 = wormhole(pos_1, dist_x,dist_y,wrap_ceiling);
@@ -176,14 +182,14 @@ void main( void ) {
 
 	// Mix color_1 and color_2. This is the basis for our new pixel color.
 	//
-	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*1.00009;
+	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*0.10009;
 	vec4 color_0_next = mix(color_2,color_1,mix_amount);
 
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 0.2 * color_1.x; //10 or 100
-	float scale_factor = 2.005  * color_1.x;
+	float blob_factor = 1.2 * color_1.x; //10 or 100
+	float scale_factor = 1.005  * color_1.x;
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
 
@@ -206,7 +212,7 @@ void main( void ) {
 	// Perform Euler's Rule.
 	//
 	float dt = 0.025 + color_0_next.x; // dependent on the original pixel
-	float dt_mod_weight = 0.21;
+	float dt_mod_weight = 0.71;
 	float dt_mod_freq = 0.0000891 + sin(color_0.y);
 	dt = modulate_sine(dt,dt_mod_weight,dt_mod_freq, 0.0,1);
 	gl_FragColor = color_0 + dt * (color_0_next - color_0);
