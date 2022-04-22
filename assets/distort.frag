@@ -128,7 +128,7 @@ void main( void ) {
 	//
 	vec2 pos_0 = gl_FragCoord.xy/u_resolution.xy;
 	pos_0.y = 1.0 - pos_0.y;
-	pos_0.x = 1.0 - pos_0.x;
+	// pos_0.x = 1.0 - pos_0.x;
 	vec4 color_0 = texture2D(u_state, pos_0);
 
 
@@ -139,13 +139,14 @@ void main( void ) {
 
 	// Universal rotation; influenced by color_0. 
 	float theta = M_2PI * 0.00101 * color_0.x;
+	theta = modulate_sine(0.0, M_2PI * 0.00101 * color_0.x, 0.0989, 1.01, 0);
 	
 	// Get the next color (color_1), influenced by color_0.
 	//
 	vec2 pos_1 = pos_0;
 
 	// The mix here affectively acts like a zoom on a camera.
-	float zoom_amount_1 = 0.005;
+	float zoom_amount_1 = 0.05;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.00989, 0.01, 0);
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
