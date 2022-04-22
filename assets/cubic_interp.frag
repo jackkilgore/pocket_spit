@@ -49,7 +49,7 @@ void main( void ) {
 
     // Uncomment to cause flashing
     // color_0 = vec4(abs(color_3.xyz - color_0.xyz),1.0);
-    color_1 = vec4(abs(color_1.xyz - color_0.xyz),1.0); // diff
+    // color_1 = vec4(abs(color_1.xyz - color_0.xyz),1.0); // diff
     // color_2 = vec4(abs(color_2.xyz - color_1.xyz),1.0);
     // color_3 = vec4(abs(color_0.xyz - color_3.xyz),1.0);
 

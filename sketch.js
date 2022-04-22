@@ -87,7 +87,11 @@ function setup() {
 			rand = floor(random(0,256))
 			rand1 = floor(random(rand - 1,rand + 1))
 			rand2 = floor(random(rand1 - 1,rand1 + 1))
-			seed[i][j] = color(rand,rand,rand,255)
+			seed[i][j] = color(rand,rand1,rand2,255)
+
+			if ( j == 0 && i == 0) {
+				seed[i][j] = color(rand,rand1,rand2,255)
+			}
 		}
 	}
 	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
@@ -174,7 +178,7 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 
 
 
-interp_dur = FRAMERATE * 0.07 //0.1, 0.14
+interp_dur = FRAMERATE * 0.1 //0.1, 0.14
 curr_interp_frame = 0
 init_frame = true
 capture_now = false
