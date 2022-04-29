@@ -87,10 +87,10 @@ function setup() {
 			rand = floor(random(0,256))
 			rand1 = floor(random(rand - 1,rand + 1))
 			rand2 = floor(random(rand1 - 1,rand1 + 1))
-			seed[i][j] = color(rand,rand1,rand2,255)
+			seed[i][j] = color(rand,rand,rand,255)
 
 			if ( j == 0 && i == 0) {
-				seed[i][j] = color(rand,rand1,rand2,255)
+				seed[i][j] = color(rand,rand,rand,255)
 			}
 		}
 	}

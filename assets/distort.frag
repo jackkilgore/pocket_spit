@@ -139,7 +139,7 @@ void main( void ) {
 
 	// Universal rotation; influenced by color_0. 
 	float theta = M_2PI * 0.0101 * color_0.x;
-	theta = modulate_sine(0.0, M_2PI * 0.00101 * color_0.x, 0.0189, 1.01, 0);
+	theta = modulate_sine(0.0, M_2PI * 0.000501 * color_0.x, 0.000189, 1.01, 0);
 	
 	// Get the next color (color_1), influenced by color_0.
 	//
@@ -147,7 +147,7 @@ void main( void ) {
 
 	// The mix here affectively acts like a zoom on a camera.
 	float zoom_amount_1 = 0.005;
-	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 0.00989, 0.01, 0);
+	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.00989, 0.01, 0);
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
 	// Rotation
@@ -160,7 +160,7 @@ void main( void ) {
 	//
 	float dist_x_mod_freq =  0.0012 * color_1.y;
 	float dist_x_mod_weight = 1. * color_1.w;
-	float dist_x = 1.0; 
+	float dist_x = 0.0; 
 	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,-1);
 
 	float dist_y_freq = 0.00005 + (color_1.z * 0.001 - 0.005);
@@ -183,14 +183,14 @@ void main( void ) {
 
 	// Mix color_1 and color_2. This is the basis for our new pixel color.
 	//
-	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5))))*0.010009;
+	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5))))*0.0010009;
 	vec4 color_0_next = mix(color_2,color_1,mix_amount);
 
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 100.2 * color_1.x; // 0.2 or 100.2
-	float scale_factor = 10.005  * color_1.x;
+	float blob_factor = 0.2 * color_0_next.x; // * abs(sin(u_timeS*M_2PI * 37.04)); // 0.2 or 100.2
+	float scale_factor = 100.005  * color_1.x * abs(sin(u_timeS*M_2PI * 0.01));
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
 
@@ -212,12 +212,12 @@ void main( void ) {
 
 	// COLORING
 	
-	color_0_next.y = color_0_next.y - color_0_next.x * color_1.y * 0.07;
-	color_0_next.z = color_0_next.z + color_0_next.x * color_2.y * 0.07;
+	// color_0_next.y = color_0_next.y - color_0_next.x * color_1.y * 0.007;
+	// color_0_next.z = color_0_next.z + color_0_next.x * color_2.y * 0.007;
 
 	// //
 	float VAR = 0.00; //color_0.x;
-	float DAMP = 0.897;
+	float DAMP = 0.197;
 	// Dampen colors
 
 	if(abs(color_0_next.z - color_0_next.x) > VAR * 1.) {
