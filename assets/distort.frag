@@ -189,7 +189,7 @@ void main( void ) {
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 0.02 * color_1.x; // 0.2 or 100.2
+	float blob_factor = 100.2 * color_1.x; // 0.2 or 100.2
 	float scale_factor = 10.005  * color_1.x;
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
