@@ -128,18 +128,18 @@ void main( void ) {
 	//
 	vec2 pos_0 = gl_FragCoord.xy/u_resolution.xy;
 	pos_0.y = 1.0 - pos_0.y;
-	pos_0.x = 1.0 - pos_0.x;
+	// pos_0.x = 1.0 - pos_0.x;
 	vec4 color_0 = texture2D(u_state, pos_0);
 
 
 	// remove symmetry
-	if(color_0.x > 0.1) {
-		pos_0.x = 1.0 - pos_0.x;
-	}
+	// if(color_0.x > 0.1) {
+	// 	pos_0.x = 1.0 - pos_0.x;
+	// }
 
 	// Universal rotation; influenced by color_0. 
-	float theta = M_2PI * 0.00101 * color_0.x;
-	theta = modulate_sine(0.0, M_2PI * 0.00101 * color_0.x, 0.0989, 1.01, 0);
+	float theta = M_2PI * 0.0101 * color_0.x;
+	theta = modulate_sine(0.0, M_2PI * 0.00101 * color_0.x, 0.0189, 1.01, 0);
 	
 	// Get the next color (color_1), influenced by color_0.
 	//
@@ -151,51 +151,51 @@ void main( void ) {
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
 	// Rotation
-  	pos_1 = rotate2D(pos_1, vec2(0.5,0.5), theta);
+  	pos_1 = rotate2D(pos_1, vec2(sin(pos_1.x),sin(pos_1.y)), theta);
 
   	vec4 color_1 = texture2D(u_state, pos_1);
 
 
 	// Get the next color (color_2), influenced by color_1.
 	//
-	float dist_x_mod_freq =  0.000012 * color_1.z;
+	float dist_x_mod_freq =  0.0012 * color_1.y;
 	float dist_x_mod_weight = 1. * color_1.w;
-	float dist_x = 0.01; 
-	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,0);
+	float dist_x = 1.0; 
+	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,-1);
 
 	float dist_y_freq = 0.00005 + (color_1.z * 0.001 - 0.005);
-	float dist_y_weight = 10.;
-	float dist_y = modulate_sine(0.,dist_y_weight,dist_y_freq, 0.0, 0);
+	float dist_y_weight = 0.1;
+	float dist_y = modulate_sine(1.,dist_y_weight,dist_y_freq, 0.0, 1);
 
-	vec2 wrap_ceiling = vec2(1.5,1.75);
+	vec2 wrap_ceiling = vec2(1.0,pos_1.x + color_1.x);
 	vec2 pos_2 = wormhole(pos_1, dist_x,dist_y,wrap_ceiling);
 
 	// Rotation
-	pos_2 = rotate2D(pos_2, vec2(0.05,0.5), theta * color_1.y);
+	pos_2 = rotate2D(pos_2, vec2(sin(pos_2.x),sin(pos_2.y)), theta * color_1.y);
 	
 	// Another "zoom".
 	float zoom_mod_2_freq = 0.001;
 	float zoom_mod_2_weight = 0.1*(2.0 * color_1.x - 1.0);
-	float zoom_amount_2 = modulate_sine(10.,zoom_mod_2_weight,zoom_mod_2_freq,0.0,0);
+	float zoom_amount_2 = modulate_sine(0.01,zoom_mod_2_weight,zoom_mod_2_freq,0.0,0);
 	pos_2 = mix(pos_2, vec2(pos_1.x,pos_1.y), zoom_amount_2);
 
 	vec4 color_2 = texture2D(u_state, pos_2);
 
 	// Mix color_1 and color_2. This is the basis for our new pixel color.
 	//
-	float mix_amount = sin(u_timeS*M_2PI * (0.7 + (1.15 * (color_2.x - 0.5))))*0.10009;
+	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5))))*0.010009;
 	vec4 color_0_next = mix(color_2,color_1,mix_amount);
 
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 1.2 * color_1.x; //10 or 100
-	float scale_factor = 1.005  * color_1.x;
+	float blob_factor = 0.02 * color_1.x; // 0.2 or 100.2
+	float scale_factor = 10.005  * color_1.x;
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
 
-	float neighbors_weight = 0.48;
-	float neighbors_weight_mod_freq = 0.21;
+	float neighbors_weight = 100.98;
+	float neighbors_weight_mod_freq = 0.0021;
 	float neighbors_weight_mod_weight = 0.4;
 	neighbors_weight = modulate_sine(neighbors_weight,
 						neighbors_weight_mod_weight,
@@ -213,11 +213,11 @@ void main( void ) {
 	// COLORING
 	
 	color_0_next.y = color_0_next.y - color_0_next.x * color_1.y * 0.07;
-	color_0_next.z = color_0_next.z + color_0_next.x * color_2.z * 0.07;
+	color_0_next.z = color_0_next.z + color_0_next.x * color_2.y * 0.07;
 
 	// //
 	float VAR = 0.00; //color_0.x;
-	float DAMP = 0.077;
+	float DAMP = 0.897;
 	// Dampen colors
 
 	if(abs(color_0_next.z - color_0_next.x) > VAR * 1.) {
@@ -233,9 +233,9 @@ void main( void ) {
 	// We have finally derived the new pixel color.
 	// Perform Euler's Rule.
 	//
-	float dt = 0.025 + color_0_next.y; // dependent on the original pixel
-	float dt_mod_weight = 0.71;
-	float dt_mod_freq = 0.0000891 + sin(color_0.y);
+	float dt = color_0_next.x; // dependent on the original pixel
+	float dt_mod_weight = 0.91;
+	float dt_mod_freq = 0.0000891 * abs(sin(color_0.y));
 	dt = modulate_sine(dt,dt_mod_weight,dt_mod_freq, 0.0,1);
 	gl_FragColor = color_0 + dt * (color_0_next - color_0);
 	gl_FragColor *= 1.000;

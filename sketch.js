@@ -7,7 +7,7 @@ let state2
 let state3
 let seed
 let tmp
-let SEED_RES = [16,9]
+let SEED_RES = [4,3]
 // let CANVAS_RES = [800,500]
 // let CANVAS_RES = [1920,1080]
 let CANVAS_RES = [3840,2160]
@@ -22,7 +22,7 @@ let test_state
 const capturer = new CCapture({
 	framerate: FRAMERATE,
 	format: "webm",
-	name: "interp_5",
+	name: "interp_6_2",
 	quality: 80,
 	verbose: true,
 	autoSaveTime: 1.0,
@@ -178,7 +178,7 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 
 
 
-interp_dur = FRAMERATE * 0.12 // 0.14
+interp_dur = FRAMERATE * -0.12 // 0.14
 curr_interp_frame = 0
 init_frame = true
 capture_now = false
