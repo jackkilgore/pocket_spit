@@ -139,7 +139,7 @@ void main( void ) {
 
 	// Universal rotation; influenced by color_0. 
 	float theta = M_2PI * 0.0101 * color_0.x;
-	theta = modulate_sine(0.0, M_2PI * 0.000501 * color_0.x, 0.000189, 1.01, 0);
+	theta = modulate_sine(0.0, M_2PI * 0.000501 * color_0.x, 34.000189, 1.01, 0);
 	
 	// Get the next color (color_1), influenced by color_0.
 	//
@@ -189,8 +189,8 @@ void main( void ) {
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 0.2 * color_0_next.x; // * abs(sin(u_timeS*M_2PI * 37.04)); // 0.2 or 100.2
-	float scale_factor = 100.005  * color_1.x * abs(sin(u_timeS*M_2PI * 0.01));
+	float blob_factor = 2. * color_0_next.x * abs(sin(u_timeS*M_2PI * 37.04)); // 0.2 or 100.2
+	float scale_factor = 100.005  * color_1.x * abs(sin(u_timeS*M_2PI * 10.01));
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
 

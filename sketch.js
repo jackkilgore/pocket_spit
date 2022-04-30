@@ -22,10 +22,11 @@ let test_state
 const capturer = new CCapture({
 	framerate: FRAMERATE,
 	format: "webm",
-	name: "interp_6_2",
+	name: "interp_7_1-trigger",
 	quality: 80,
 	verbose: true,
 	autoSaveTime: 1.0,
+	timeLimit: 900
   });
 
 function copy_state(state_in, state_out) {
@@ -181,7 +182,7 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 interp_dur = FRAMERATE * -0.12 // 0.14
 curr_interp_frame = 0
 init_frame = true
-capture_now = false
+capture_now = true
 
 function draw() {
 	if (init_frame) {
