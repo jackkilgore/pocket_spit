@@ -167,7 +167,7 @@ void main( void ) {
   	color_1 = texture2D(u_state, first_move); // stealing another pixels memory
 
 
-	float blob_factor = 50. * color_1.x; //10 or 100
+	float blob_factor = 2.1 * color_1.x; //10 or 100
 	float scale_factor = 0.05 * color_1.z;
 	vec2 wrap_ceiling = vec2(1.11,1.2); //0.11, 0.2 (weights of noise)
 	wrap_ceiling.x += 0.001 * (color_1.x - 0.5);
@@ -194,9 +194,12 @@ void main( void ) {
 
 	// COLORING
 	
-	float color_mod = modulate_sine(0.0,1.0 * color_0.x,1.5* color_0.z,0.0,0);
-	my_next_color.y = my_next_color.y - my_next_color.x * color_1.x * color_mod;
-	my_next_color.z = my_next_color.z + my_next_color.y * color_2.z * color_mod;
+	float color_mod_x = modulate_sine(0.0,1.0 * color_0.x,1.5* color_0.z,0.0,0);
+	float color_mod_y = modulate_sine(0.0,1.0 * color_1.x,1.5* color_1.y,0.0,0);
+	float color_mod_z = modulate_sine(0.0,1.0 * color_2.x,1.5* color_2.z,0.0,0);
+	my_next_color.x = my_next_color.x - my_next_color.x * color_0.x * color_mod_x;
+	my_next_color.y = my_next_color.y - my_next_color.x * color_1.x * color_mod_y;
+	my_next_color.z = my_next_color.z + my_next_color.x * color_1.z * color_mod_z;
 
 	// //
 	float VAR = 0.00; //color_0.x;
@@ -211,7 +214,7 @@ void main( void ) {
 		my_next_color.y -= DAMP * (my_next_color.y - my_next_color.x);
 	}
 
-	my_next_color -= neighbors;
+	my_next_color += neighbors;
 
 	// We have finally derived the new pixel color.
 	// Perform Euler's Rule.
