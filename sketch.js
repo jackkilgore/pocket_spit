@@ -182,7 +182,7 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 interp_dur = FRAMERATE * -0.12 // 0.14
 curr_interp_frame = 0
 init_frame = true
-capture_now = true
+capture_now = false
 
 function draw() {
 	if (init_frame) {
