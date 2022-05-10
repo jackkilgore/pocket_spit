@@ -55,7 +55,7 @@ void main( void ) {
 
     gl_FragColor = cubic_interp(color_0,color_1,color_2,color_3,u_interp_amount)  * 1.0;
 
-   //  gl_FragColor.xyz =  (gl_FragColor.xyz * -1.) + 1.0;
+    gl_FragColor.xyz =  (gl_FragColor.xyz * -1.) + 1.0;
 
 
 }
