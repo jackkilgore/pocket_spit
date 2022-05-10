@@ -189,6 +189,25 @@ void main( void ) {
 
 	vec4 neighbors = laplace(gl_FragCoord.xy/u_resolution.xy,blob_factor, scale_factor) * neighbors_weight;
 
+	// COLORING
+	
+	float color_mod = modulate_sine(0.07,0.5 * color_0.x,1.0* color_0.z,0.0,1);
+	my_next_color.y = my_next_color.y - my_next_color.x * color_1.x * color_mod;
+	my_next_color.z = my_next_color.z + my_next_color.y * color_2.z * color_mod;
+
+	// //
+	float VAR = 0.00; //color_0.x;
+	float DAMP = 0.007;
+	// Dampen colors
+
+	if(abs(my_next_color.z - my_next_color.x) > VAR * 1.) {
+		my_next_color.z -= DAMP * (my_next_color.z - my_next_color.x);
+	} 
+
+	if(abs(my_next_color.y - my_next_color.x) > VAR * 1.) {
+		my_next_color.y -= DAMP * (my_next_color.y - my_next_color.x);
+	}
+
 	my_next_color -= neighbors;
   	gl_FragColor = my_next_color;
 }

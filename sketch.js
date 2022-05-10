@@ -7,7 +7,7 @@ let state2
 let state3
 let seed
 let tmp
-let SEED_RES = [4,3]
+let SEED_RES = [16,9]
 // let CANVAS_RES = [800,500]
 // let CANVAS_RES = [1920,1080]
 let CANVAS_RES = [3840,2160]
@@ -88,10 +88,10 @@ function setup() {
 			rand = floor(random(0,256))
 			rand1 = floor(random(rand - 1,rand + 1))
 			rand2 = floor(random(rand1 - 1,rand1 + 1))
-			seed[i][j] = color(rand,rand,rand,255)
+			seed[i][j] = color(rand,rand1,rand2,255)
 
 			if ( j == 0 && i == 0) {
-				seed[i][j] = color(rand,rand,rand,255)
+				seed[i][j] = color(rand,rand1,rand2,255)
 			}
 		}
 	}
