@@ -22,7 +22,7 @@ let test_state
 const capturer = new CCapture({
 	framerate: FRAMERATE,
 	format: "webm",
-	name: "interp_7_1-trigger",
+	name: "interp_8_1-tile",
 	quality: 80,
 	verbose: true,
 	autoSaveTime: 1.0,
@@ -179,7 +179,7 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 
 
 
-interp_dur = FRAMERATE * -2/60 // 0.14
+interp_dur = FRAMERATE * 1/60 // 0.14
 curr_interp_frame = 0
 init_frame = true
 capture_now = false
