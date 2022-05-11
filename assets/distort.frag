@@ -186,11 +186,17 @@ void main( void ) {
 	neigh_pos = rotate2D(neigh_pos, vec2(color_1.x,0.5), theta * color_1.y);
 	
 	// use to be weighted by 0.01, made it less pencil
-	neigh_pos = mix(neigh_pos, vec2(color_1.z,0.5), sin(u_timeS*M_2PI * .01) * 0.01*  (2.0 * color_1.z - 1.0));
+	neigh_pos = mix(neigh_pos, vec2(color_1.z,0.5), sin(u_timeS*M_2PI * .01) * 0.001*  (2.0 * color_1.z - 1.0));
 
 	color_2 = texture2D(u_state, neigh_pos);
 
-	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.z - 0.5))) + 0.5)*0.9 * color_2.z;
+	float mix_amount_freq = (0.07 + (1.15 * (color_2.z - 0.5)));
+	mix_amount_freq = modulate_sine(mix_amount_freq,0.001,0.1,0.0,0);
+
+	float mix_amount_weight = 0.9 * color_2.z;
+	mix_amount_weight = modulate_sine(mix_amount_weight,0.01,0.01,0.0,0);
+
+	float mix_amount = sin(u_timeS*M_2PI * mix_amount_freq + 0.5)*mix_amount_weight;
 	my_next_color = mix(color_2,color_1,mix_amount);
 
 	float neighbors_weight = (0.3 * (sin(u_timeS * M_2PI * 0.01 + M_PI) + 1.2));
