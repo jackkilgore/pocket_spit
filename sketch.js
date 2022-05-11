@@ -8,9 +8,9 @@ let state3
 let seed
 let tmp
 let SEED_RES = [4,3]
-// let CANVAS_RES = [800,500]
+let CANVAS_RES = [1200,800]
 // let CANVAS_RES = [1920,1080]
-let CANVAS_RES = [3840,2160]
+// let CANVAS_RES = [3840,2160]
 // let CANVAS_RES = [7680,4320] // 8k
 let FRAMERATE = 60
 let M_2PI = 6.283185307179586
@@ -18,6 +18,12 @@ let bang = 0
 let NUM_LFOS = 5
 let lfos
 let test_state
+
+// RECORDING PARAMS
+let slider_state
+let USE_RECORDED_PARAM = true
+let RECORED_PARAM_PATH = 'param_recordings/test.json'
+let RECORDED_PARAMS
 
 const capturer = new CCapture({
 	framerate: FRAMERATE,
@@ -45,9 +51,43 @@ function preload() {
 							'assets/interp_textures.frag')
 	cubic_s = loadShader('assets/basic.vert',
 							'assets/cubic_interp.frag')
+
+	if (USE_RECORDED_PARAM) {
+		RECORDED_PARAMS = loadJSON(RECORED_PARAM_PATH)
+	}
+}
+
+function setup_param_record() {
+	slider_state = ParamBuff("SLIDER_1")
+}
+
+function record_params() {
+	slider_state.pushParam(SLIDER_1_VAL_OSC)
+}
+function get_recorded_param(index) {
+	// if wrap === loop
+	SLIDER_1_VAL_JSON = RECORDED_PARAMS.buff[index % RECORDED_PARAMS.buff.length]
+	// if wrap === stop
+	// if (index >= RECORDED_PARAMS.buff.length) {
+	// 	SLIDER_1_VAL_JSON = RECORDED_PARAMS.buff[RECORDED_PARAMS.buff.length - 1]
+	// } else {
+	// 	SLIDER_1_VAL_JSON = RECORDED_PARAMS.buff[index]
+	// }
+}
+
+function save_params() {
+	const JSON_out = JSON.stringify(slider_state,space=4)
+	console.log(JSON_out)
+
+	let writer = createWriter('test.json');
+	writer.write(JSON_out);	
+	writer.close();
 }
 
 function setup() {
+	setup_param_record()
+	setupOsc(OSC_PORT_IN, OSC_PORT_OUT)
+
 	pixelDensity(1)
 	frameRate(FRAMERATE)
 	global_canvas = createCanvas(CANVAS_RES[0],CANVAS_RES[1])
@@ -116,7 +156,7 @@ function setup() {
 
 let delta_time = 1.0/FRAMERATE
 let time = 1 * delta_time
-
+let curr_frame = 0
 // Use state to compute the global screen
 function compute(state_in, state_out) {
 	// Compute lfos
@@ -127,6 +167,15 @@ function compute(state_in, state_out) {
 	distort_s.setUniform('u_state', state_in)
 	distort_s.setUniform('u_timeS', time)
 	distort_s.setUniform('u_lfos', lfos[0])
+
+	
+	if (USE_RECORDED_PARAM) {
+		get_recorded_param(curr_frame)
+		distort_s.setUniform('u_slider_1',SLIDER_1_VAL_JSON)
+		// console.log(SLIDER_1_VAL_JSON)
+	} else {
+		distort_s.setUniform('u_slider_1',SLIDER_1_VAL_OSC)
+	}
 	//distort_s.setUniform('u_bang', bang)
 
 	// Run shader: use state to create some output 
@@ -143,7 +192,7 @@ function compute(state_in, state_out) {
 	state_out.pop()
 
 	time += delta_time
-
+	curr_frame += 1
 	return state_out
 }
 
@@ -182,9 +231,14 @@ function cubic_interp(stateA, stateB, stateC, stateD, interp_amount) {
 interp_dur = FRAMERATE * -0.12 // 0.14
 curr_interp_frame = 0
 init_frame = true
-capture_now = true
+capture_now = false
+CAPTURE_PARAM = false
 
 function draw() {
+	if (CAPTURE_PARAM) {
+		record_params()
+	}
+
 	if (init_frame) {
 
 		// Capture logic
@@ -237,10 +291,16 @@ function draw() {
 	}
 
 }
+
+
 function keyReleased() {
 	if(key === 'g') {
 		capturer.start()
 		capture_now = true
+	}
+
+	if(key === 'p') {
+		save_params()
 	}
 
 	if(key === 's') {

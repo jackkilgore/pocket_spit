@@ -12,6 +12,7 @@ precision mediump int;
 uniform sampler2D u_state;
 uniform vec2 u_resolution;
 uniform float u_timeS;
+uniform float u_slider_1;
 
 vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
 	return
@@ -146,7 +147,7 @@ void main( void ) {
 	vec2 pos_1 = pos_0;
 
 	// The mix here affectively acts like a zoom on a camera.
-	float zoom_amount_1 = 0.005;
+	float zoom_amount_1 = 0.05 * u_slider_1;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.00989, 0.01, 0);
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
@@ -189,8 +190,8 @@ void main( void ) {
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 2. * color_0_next.x * abs(sin(u_timeS*M_2PI * 37.04)); // 0.2 or 100.2
-	float scale_factor = 100.005  * color_1.x * abs(sin(u_timeS*M_2PI * 10.01));
+	float blob_factor = 100.2 * color_0_next.x * abs(sin(u_timeS*M_2PI * 0.04 * u_slider_1)) * (1.0 - u_slider_1); // 0.2 or 100.2 2.0
+	float scale_factor = 100.005  * color_1.x * abs(sin(u_timeS*M_2PI * 10.01 * u_slider_1));
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
 
