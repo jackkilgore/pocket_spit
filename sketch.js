@@ -21,7 +21,7 @@ let test_state
 
 // RECORDING PARAMS
 let slider_state
-let USE_RECORDED_PARAM = true
+let USE_RECORDED_PARAM = false
 let RECORED_PARAM_PATH = 'param_recordings/test.json'
 let RECORDED_PARAMS
 
@@ -174,9 +174,13 @@ function compute(state_in, state_out) {
 		distort_s.setUniform('u_slider_1',SLIDER_1_VAL_JSON)
 		// console.log(SLIDER_1_VAL_JSON)
 	} else {
-		distort_s.setUniform('u_slider_1',SLIDER_1_VAL_OSC)
+		distort_s.setUniform('u_slider_1',PARAMS['params'][pnames.slider_1].value)
 	}
-	//distort_s.setUniform('u_bang', bang)
+	if(PARAMS['params'][pnames.trig].value) {
+		PARAMS['params'][pnames.trig].value = false
+		distort_s.setUniform('u_slider_1',0.045)
+	}
+
 
 	// Run shader: use state to create some output 
 	screen.shader(distort_s)

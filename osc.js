@@ -6,19 +6,26 @@ let SLIDER_1_VAL_JSON = 0.001
 
 https://github.com/genekogan/p5js-osc/blob/master/p5-basic/sketch.js
 function receiveOsc(address, value) {
-	// console.log("received OSC: " + address + ", " + value)
-    SLIDER_1_VAL_OSC = value[0]
-	// if (address == LATENT_MEAN_ADDR) {
-	// 	// Update display
-	// }
 
-	// // Ehhh should we loop or have a bunch of cases?
-	// for (knob of knobs) {
-	// 	if (knob.address === address) {
-	// 		knob.set_val(value[0])
-	// 		break
-	// 	}
-	// }
+	if (PARAMS['PARAM_MODE'] !== param_mode.osc)
+		return
+
+	
+	console.log("received OSC: " + address + ", " + value)
+
+	if (value.length === 1) {
+		value = value[0]
+	}
+
+	// Update parameters (maybe make a dictionary where they key is the address)
+	// A coproduct for keys would be neat
+	for(let index = 0; index < PARAMS.params.length; index++) {
+		if (PARAMS.params[index].address === address) {
+			PARAMS.params[index].value = value
+		}
+	}
+
+    SLIDER_1_VAL_OSC = value[0]
 }
 
 function sendOsc(address, value) {
@@ -43,20 +50,4 @@ function setupOsc(oscPortIn, oscPortOut) {
 			receiveOsc(msg[0], msg.splice(1))
 		}
 	});
-}
-
-var ParamBuffObj = {
-	buff: undefined,
-	name: undefined,
-	pushParam: function(param_val) {
-		this.buff.push(param_val)
-	}
-}
-
-// Everything defined here will be saved by JSON.stringify. The rest will be hidden
-function ParamBuff(name) {
-    let obj = Object.create( ParamBuffObj );
-	obj.name = name
-	obj.buff = []
-    return obj
 }
