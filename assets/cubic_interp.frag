@@ -48,14 +48,14 @@ void main( void ) {
     vec4 color_3 = texture2D(u_texD, pos_0);
 
     // Uncomment to cause flashing
-    color_0 = vec4(abs(color_3.xyz - color_0.xyz),1.0);
-    color_1 = vec4(abs(color_1.xyz - color_0.xyz),1.0); // diff
-    color_2 = vec4(abs(color_2.xyz - color_1.xyz),1.0);
-    color_3 = vec4(abs(color_0.xyz - color_3.xyz),1.0);
+   //  color_0 = vec4(abs(color_3.xyz - color_0.xyz),1.0);
+   //  color_1 = vec4(abs(color_1.xyz - color_0.xyz),1.0); // diff
+   //  color_2 = vec4(abs(color_2.xyz - color_1.xyz),1.0);
+   //  color_3 = vec4(abs(color_0.xyz - color_3.xyz),1.0);
 
     gl_FragColor = cubic_interp(color_0,color_1,color_2,color_3,u_interp_amount)  * 1.0;
 
-    gl_FragColor.xyz =  (gl_FragColor.xyz * -1.) + 1.0;
+   //  gl_FragColor.xyz =  (gl_FragColor.xyz * -1.) + 1.0;
 
 
 }

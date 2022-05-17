@@ -28,6 +28,12 @@ function UniformDict() {
 
 	uniform_temp = Uniform("u_slider_1",0.0)
 	uniform_dict[uniform_temp.name] = uniform_temp
+
+    uniform_temp = Uniform("u_slider_speed",0.0)
+	uniform_dict[uniform_temp.name] = uniform_temp
+
+    uniform_temp = Uniform("u_slider_rot",0.0)
+	uniform_dict[uniform_temp.name] = uniform_temp
 	
 	return uniform_dict
 }
@@ -66,7 +72,13 @@ const param_mode = {
 
 const pnames = {
     slider_1: 0,
-    trig: 1
+    slider_speed: 1,
+    slider_rot: 2,
+    slider_grit: 3,
+    slider_horiz: 4,
+    slider_vert: 5,
+    slider_damp: 6,
+    trig: 7
 }
 
 // DEFINE PARAMTERS HERE
@@ -82,6 +94,24 @@ function ParamDict() {
 
 	param_temp = Param('slider_1',0.0001,OSC_NAMESPACE + '/slider_1')
 	param_dict['params'][pnames.slider_1] = param_temp
+
+    param_temp = Param('slider_speed',0.0001,OSC_NAMESPACE + '/slider_speed')
+	param_dict['params'][pnames.slider_speed] = param_temp
+
+    param_temp = Param('slider_rot',0.0001,OSC_NAMESPACE + '/slider_rot')
+	param_dict['params'][pnames.slider_rot] = param_temp
+
+    param_temp = Param('slider_grit',0.0001,OSC_NAMESPACE + '/slider_grit')
+	param_dict['params'][pnames.slider_grit] = param_temp
+
+    param_temp = Param('slider_horiz',0.0001,OSC_NAMESPACE + '/slider_horiz')
+	param_dict['params'][pnames.slider_horiz] = param_temp
+
+    param_temp = Param('slider_vert',1.0001,OSC_NAMESPACE + '/slider_vert')
+	param_dict['params'][pnames.slider_vert] = param_temp
+
+    param_temp = Param('slider_damp',0.001,OSC_NAMESPACE + '/slider_damp')
+	param_dict['params'][pnames.slider_damp] = param_temp
 
     param_temp = Param('trig',false,OSC_NAMESPACE + '/trig')
 	param_dict['params'][pnames.trig] = param_temp

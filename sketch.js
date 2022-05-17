@@ -175,6 +175,12 @@ function compute(state_in, state_out) {
 		// console.log(SLIDER_1_VAL_JSON)
 	} else {
 		distort_s.setUniform('u_slider_1',PARAMS['params'][pnames.slider_1].value)
+		distort_s.setUniform('u_slider_speed',PARAMS['params'][pnames.slider_speed].value)
+		distort_s.setUniform('u_slider_rot',PARAMS['params'][pnames.slider_rot].value)
+		distort_s.setUniform('u_slider_grit',PARAMS['params'][pnames.slider_grit].value)
+		distort_s.setUniform('u_slider_horiz',PARAMS['params'][pnames.slider_horiz].value)
+		distort_s.setUniform('u_slider_vert',PARAMS['params'][pnames.slider_vert].value)
+		distort_s.setUniform('u_slider_damp',PARAMS['params'][pnames.slider_damp].value)
 	}
 	if(PARAMS['params'][pnames.trig].value) {
 		PARAMS['params'][pnames.trig].value = false

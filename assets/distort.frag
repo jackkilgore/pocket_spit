@@ -12,7 +12,7 @@ precision mediump int;
 uniform sampler2D u_state;
 uniform vec2 u_resolution;
 uniform float u_timeS;
-uniform float u_slider_1;
+uniform float u_slider_1, u_slider_speed, u_slider_rot, u_slider_grit, u_slider_damp, u_slider_vert, u_slider_horiz;
 
 vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
 	return
@@ -139,20 +139,20 @@ void main( void ) {
 	// }
 
 	// Universal rotation; influenced by color_0. 
-	float theta = M_2PI * 0.0101 * color_0.x;
-	theta = modulate_sine(0.0, M_2PI * 0.000501 * color_0.x, 34.000189, 1.01, 0);
+	float theta = M_2PI * 0.000501 * color_0.x *  u_slider_rot;
+	// theta = modulate_sine(0.0, theta , 34.000189, 1.01, 0) *  u_slider_rot;
 	
 	// Get the next color (color_1), influenced by color_0.
 	//
 	vec2 pos_1 = pos_0;
 
 	// The mix here affectively acts like a zoom on a camera.
-	float zoom_amount_1 = 0.05 * u_slider_1;
-	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.001, 1.00989, 0.01, 0);
+	float zoom_amount_1 = 0.01 * u_slider_speed;
+	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.0, 1.00989, 0.01, 0);
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
 	// Rotation
-  	pos_1 = rotate2D(pos_1, vec2(sin(pos_1.x),sin(pos_1.y)), theta);
+  	pos_1 = rotate2D(pos_1, vec2(sin(pos_1.x),sin(pos_1.y)) * u_slider_rot, theta);
 
   	vec4 color_1 = texture2D(u_state, pos_1);
 
@@ -161,12 +161,13 @@ void main( void ) {
 	//
 	float dist_x_mod_freq =  0.0012 * color_1.y;
 	float dist_x_mod_weight = 1. * color_1.w;
-	float dist_x = 0.0; 
+	float dist_x = u_slider_horiz * -4.0; 
 	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,-1);
 
 	float dist_y_freq = 0.00005 + (color_1.z * 0.001 - 0.005);
 	float dist_y_weight = 0.1;
-	float dist_y = modulate_sine(1.,dist_y_weight,dist_y_freq, 0.0, 1);
+	float dist_y = u_slider_vert * 4.0; 
+	dist_y = modulate_sine(dist_y,dist_y_weight,dist_y_freq, 0.0, 1);
 
 	vec2 wrap_ceiling = vec2(1.0,pos_1.x + color_1.x);
 	vec2 pos_2 = wormhole(pos_1, dist_x,dist_y,wrap_ceiling);
@@ -177,21 +178,22 @@ void main( void ) {
 	// Another "zoom".
 	float zoom_mod_2_freq = 0.001;
 	float zoom_mod_2_weight = 0.1*(2.0 * color_1.x - 1.0);
-	float zoom_amount_2 = modulate_sine(0.01,zoom_mod_2_weight,zoom_mod_2_freq,0.0,0);
+	float zoom_amount_2 = 0.1;
+	zoom_amount_2 = modulate_sine(zoom_amount_2,zoom_mod_2_weight,zoom_mod_2_freq,0.0,0);
 	pos_2 = mix(pos_2, vec2(pos_1.x,pos_1.y), zoom_amount_2);
 
 	vec4 color_2 = texture2D(u_state, pos_2);
 
 	// Mix color_1 and color_2. This is the basis for our new pixel color.
 	//
-	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5))))*0.0010009;
+	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5)))* (1.+u_slider_grit) )*2.5010009 * u_slider_grit;
 	vec4 color_0_next = mix(color_2,color_1,mix_amount);
 
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 100.2 * color_0_next.x * abs(sin(u_timeS*M_2PI * 0.04 * u_slider_1)) * (1.0 - u_slider_1); // 0.2 or 100.2 2.0
-	float scale_factor = 100.005  * color_1.x * abs(sin(u_timeS*M_2PI * 10.01 * u_slider_1));
+	float blob_factor = 10.2 * color_0_next.x; //* ( u_slider_1); // 0.2 or 100.2 2.0 * abs(sin(u_timeS*M_2PI * 0.04))
+	float scale_factor = 10000.005* color_1.x; //* (u_slider_1);  //
 	vec2 neighborhood = pos_0;
 	neighborhood.y = 1.0 - pos_0.y;
 
@@ -218,16 +220,16 @@ void main( void ) {
 
 	// //
 	float VAR = 0.00; //color_0.x;
-	float DAMP = 0.197;
-	// Dampen colors
+	float DAMP = 1.0 * u_slider_damp;
+	// // Dampen colors
 
-	if(abs(color_0_next.z - color_0_next.x) > VAR * 1.) {
-		color_0_next.z -= DAMP * (color_0_next.z - color_0_next.x);
-	} 
+	// if(abs(color_0_next.z - color_0_next.x) > VAR * 1.) {
+	// 	color_0_next.z -= DAMP * (color_0_next.z - color_0_next.x);
+	// } 
 
-	if(abs(color_0_next.y - color_0_next.x) > VAR * 1.) {
-		color_0_next.y -= DAMP * (color_0_next.y - color_0_next.x);
-	}
+	// if(abs(color_0_next.y - color_0_next.x) > VAR * 1.) {
+	// 	color_0_next.y -= DAMP * (color_0_next.y - color_0_next.x);
+	// }
 
 
 
@@ -235,10 +237,10 @@ void main( void ) {
 	// Perform Euler's Rule.
 	//
 	float dt = color_0_next.x; // dependent on the original pixel
-	float dt_mod_weight = 0.91;
+	float dt_mod_weight = 1.01 * (1. - u_slider_1);
 	float dt_mod_freq = 0.0000891 * abs(sin(color_0.y));
 	dt = modulate_sine(dt,dt_mod_weight,dt_mod_freq, 0.0,1);
 	gl_FragColor = color_0 + dt * (color_0_next - color_0);
-	gl_FragColor *= 1.000;
+	gl_FragColor *= 1.0;
 
 }
