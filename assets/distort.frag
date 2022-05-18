@@ -186,7 +186,7 @@ void main( void ) {
 
 	// Mix color_1 and color_2. This is the basis for our new pixel color.
 	//
-	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5)))* (1.+u_slider_grit) )*2.5010009 * u_slider_grit;
+	float mix_amount = sin(u_timeS*M_2PI * (0.07 + (1.15 * (color_2.x - 0.5)))* (1.+u_slider_grit) )*1.5010009 * u_slider_grit;
 	vec4 color_0_next = mix(color_2,color_1,mix_amount);
 
 

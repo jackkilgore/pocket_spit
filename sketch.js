@@ -184,7 +184,11 @@ function compute(state_in, state_out) {
 	}
 	if(PARAMS['params'][pnames.trig].value) {
 		PARAMS['params'][pnames.trig].value = false
-		distort_s.setUniform('u_slider_1',0.045)
+		distort_s.setUniform('u_slider_1',0.0)
+		distort_s.setUniform('u_slider_grit',1.0)
+		distort_s.setUniform('u_slider_rot',PARAMS['params'][pnames.slider_rot].value + random(-10.1,10.1))
+		distort_s.setUniform('u_slider_vert',PARAMS['params'][pnames.slider_vert].value + random(-10.1,10.1))
+		distort_s.setUniform('u_slider_speed',PARAMS['params'][pnames.slider_speed].value + random(-10.1,10.1))
 	}
 
 
