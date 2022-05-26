@@ -139,7 +139,7 @@ void main( void ) {
 	// }
 
 	// Universal rotation; influenced by color_0. 
-	float theta = M_2PI * 0.000501 * color_0.x *  u_slider_rot;
+	float theta = M_2PI * 0.101 * color_0.x *  u_slider_rot * 0.25;
 	// theta = modulate_sine(0.0, theta , 34.000189, 1.01, 0) *  u_slider_rot;
 	
 	// Get the next color (color_1), influenced by color_0.
@@ -147,12 +147,12 @@ void main( void ) {
 	vec2 pos_1 = pos_0;
 
 	// The mix here affectively acts like a zoom on a camera.
-	float zoom_amount_1 = 0.01 * u_slider_speed;
+	float zoom_amount_1 = 0.01 * u_slider_speed * 0.25;
 	zoom_amount_1 = modulate_sine(zoom_amount_1, 0.0, 1.00989, 0.01, 0);
 	pos_1 = mix(pos_1, vec2(color_0.x,color_0.y), zoom_amount_1);
 
 	// Rotation
-  	pos_1 = rotate2D(pos_1, vec2(sin(pos_1.x),sin(pos_1.y)) * u_slider_rot, theta);
+  	pos_1 = rotate2D(pos_1, vec2(pos_1.x,pos_1.y), theta);
 
   	vec4 color_1 = texture2D(u_state, pos_1);
 
@@ -161,12 +161,12 @@ void main( void ) {
 	//
 	float dist_x_mod_freq =  0.0012 * color_1.y;
 	float dist_x_mod_weight = 1. * color_1.w;
-	float dist_x = u_slider_horiz * -4.0; 
+	float dist_x = u_slider_horiz * -4.0 * 0.25; 
 	dist_x = modulate_sine(dist_x,dist_x_mod_weight, dist_x_mod_freq,0.0,-1);
 
 	float dist_y_freq = 0.00005 + (color_1.z * 0.001 - 0.005);
 	float dist_y_weight = 0.1;
-	float dist_y = u_slider_vert * 4.0; 
+	float dist_y = u_slider_vert * 4.0 * 0.25; 
 	dist_y = modulate_sine(dist_y,dist_y_weight,dist_y_freq, 0.0, 1);
 
 	vec2 wrap_ceiling = vec2(1.0,pos_1.x + color_1.x);
