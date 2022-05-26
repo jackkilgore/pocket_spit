@@ -78,7 +78,9 @@ const pnames = {
     slider_horiz: 4,
     slider_vert: 5,
     slider_damp: 6,
-    trig: 7
+	slider_blob: 7,
+	slider_global_speed: 8,
+    reseed: 9
 }
 
 // DEFINE PARAMTERS HERE
@@ -113,8 +115,14 @@ function ParamDict() {
     param_temp = Param('slider_damp',0.001,OSC_NAMESPACE + '/slider_damp')
 	param_dict['params'][pnames.slider_damp] = param_temp
 
-    param_temp = Param('trig',false,OSC_NAMESPACE + '/trig')
-	param_dict['params'][pnames.trig] = param_temp
+	param_temp = Param('slider_blob',1.00,OSC_NAMESPACE + '/slider_blob')
+	param_dict['params'][pnames.slider_blob] = param_temp
+
+	param_temp = Param('slider_global_speed',-0.1,OSC_NAMESPACE + '/slider_global_speed')
+	param_dict['params'][pnames.slider_global_speed] = param_temp
+
+    param_temp = Param('reseed',false,OSC_NAMESPACE + '/reseed')
+	param_dict['params'][pnames.reseed] = param_temp
 
 	return param_dict
 }

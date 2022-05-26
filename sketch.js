@@ -7,6 +7,7 @@ let state2
 let state3
 let seed
 let tmp
+let test_pixel
 let SEED_RES = [4,3]
 let CANVAS_RES = [1200,800]
 // let CANVAS_RES = [1920,1080]
@@ -54,7 +55,12 @@ function preload() {
 
 	if (USE_RECORDED_PARAM) {
 		RECORDED_PARAMS = loadJSON(RECORED_PARAM_PATH)
+
 	}
+	setup_param_record()
+
+	// Preload to deal with synchronicity issues
+	setupOsc(OSC_PORT_IN, OSC_PORT_OUT)
 }
 
 function setup_param_record() {
@@ -84,9 +90,37 @@ function save_params() {
 	writer.close();
 }
 
+function create_seed() {
+	seed = []
+	for (i = 0; i < SEED_RES[0]; i++) {
+		seed[i] = []
+		for (j = 0; j < SEED_RES[1]; j++) {
+			rand = floor(random(0,256))
+			rand1 = floor(random(rand - 1,rand + 1))
+			rand2 = floor(random(rand1 - 1,rand1 + 1))
+			seed[i][j] = color(rand,rand,rand,255)
+
+			if ( j == 0 && i == 0) {
+				seed[i][j] = color(rand,rand,rand,255)
+			}
+		}
+	}
+	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
+
+	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
+	// Load seed image into the state
+	tmp.loadPixels();
+	let scale = [SEED_RES[0] / state0.width, SEED_RES[1] / state0.height];
+	for (i = 0; i < tmp.width; i++) {
+	  for (j = 0; j < tmp.height; j++) {
+		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
+	  }
+	}
+	tmp.updatePixels();
+	return tmp
+}
+
 function setup() {
-	setup_param_record()
-	setupOsc(OSC_PORT_IN, OSC_PORT_OUT)
 
 	pixelDensity(1)
 	frameRate(FRAMERATE)
@@ -114,40 +148,8 @@ function setup() {
 	for(i = 0; i < NUM_LFOS; i++) {
 		lfos[i] = 0.0
 	}
-
-	// Build a random seed image
-	// Karl: Try hsv
-	// Pau: try post-processing filtering
-	// Pau: flatten 3d color to a path through a 3d space
-		// Pau: ColorGraph
-		// Karl: try helix
-	seed = []
-	for (i = 0; i < SEED_RES[0]; i++) {
-		seed[i] = []
-		for (j = 0; j < SEED_RES[1]; j++) {
-			rand = floor(random(0,256))
-			rand1 = floor(random(rand - 1,rand + 1))
-			rand2 = floor(random(rand1 - 1,rand1 + 1))
-			seed[i][j] = color(rand,rand,rand,255)
-
-			if ( j == 0 && i == 0) {
-				seed[i][j] = color(rand,rand,rand,255)
-			}
-		}
-	}
-	// seed[SEED_RES[0]/2][SEED_RES[1]/2] = color(61,119,194,255)
-
-	tmp = createGraphics(CANVAS_RES[0], CANVAS_RES[1]);
-	// Load seed image into the state
-	tmp.loadPixels();
-	let scale = [SEED_RES[0] / state0.width, SEED_RES[1] / state0.height];
-	for (i = 0; i < tmp.width; i++) {
-	  for (j = 0; j < tmp.height; j++) {
-		tmp.set(i, j, seed[floor(i * scale[0])][floor(j * scale[1])]);
-	  }
-	}
-	tmp.updatePixels();
 	
+	tmp = create_seed()
 	state0 = copy_state(tmp,state0)
 	state1 = copy_state(tmp,state1) // TODO ZERO THESE OUT
 	state2 = copy_state(tmp,state2)
@@ -181,14 +183,23 @@ function compute(state_in, state_out) {
 		distort_s.setUniform('u_slider_horiz',PARAMS['params'][pnames.slider_horiz].value)
 		distort_s.setUniform('u_slider_vert',PARAMS['params'][pnames.slider_vert].value)
 		distort_s.setUniform('u_slider_damp',PARAMS['params'][pnames.slider_damp].value)
+		distort_s.setUniform('u_slider_blob',PARAMS['params'][pnames.slider_blob].value)
 	}
-	if(PARAMS['params'][pnames.trig].value) {
-		PARAMS['params'][pnames.trig].value = false
-		distort_s.setUniform('u_slider_1',0.0)
-		distort_s.setUniform('u_slider_grit',1.0)
-		distort_s.setUniform('u_slider_rot',PARAMS['params'][pnames.slider_rot].value + random(-10.1,10.1))
-		distort_s.setUniform('u_slider_vert',PARAMS['params'][pnames.slider_vert].value + random(-10.1,10.1))
-		distort_s.setUniform('u_slider_speed',PARAMS['params'][pnames.slider_speed].value + random(-10.1,10.1))
+	if(PARAMS['params'][pnames.reseed].value > 0) {
+		PARAMS['params'][pnames.reseed].value = 0
+
+		// Reseed everything
+		tmp = create_seed()
+		state0 = copy_state(tmp,state0)
+		state1 = copy_state(tmp,state1) // TODO ZERO THESE OUT
+		state2 = copy_state(tmp,state2)
+		state3 = copy_state(tmp,state3)
+
+		// distort_s.setUniform('u_slider_1',0.0)
+		// distort_s.setUniform('u_slider_grit',1.0)
+		// distort_s.setUniform('u_slider_rot',PARAMS['params'][pnames.slider_rot].value + random(-10.1,10.1))
+		// distort_s.setUniform('u_slider_vert',PARAMS['params'][pnames.slider_vert].value + random(-10.1,10.1))
+		// distort_s.setUniform('u_slider_speed',PARAMS['params'][pnames.slider_speed].value + random(-10.1,10.1))
 	}
 
 
@@ -253,6 +264,10 @@ function draw() {
 		record_params()
 	}
 
+	if(PARAMS['PARAM_MODE'] === param_mode.osc) {
+		interp_dur = PARAMS['params'][pnames.slider_global_speed].value
+	}
+
 	if (init_frame) {
 
 		// Capture logic
@@ -290,7 +305,14 @@ function draw() {
 	// lin_interp(state0,state1,curr_interp_frame / interp_dur)
 	// some error here, only colors interpolating but not geometry HMMM
 	cubic_interp(state0,state1,state2,state3,curr_interp_frame / interp_dur)
-	
+
+	// Do some post processing
+	// state3.loadPixels()
+	// state3.push()
+	// state3.translate(-state3.width/2, -state3.height/2)
+	// test_pixel = state3.pixels[0] / 255.
+	// sendOsc("/pocketspit/test_pixel",test_pixel) // CANT CALL THIS UNTIL WE KNOW OSC.JS IS LOADED 
+	// state3.pop()
 
 	// DRAW
 	background(30)

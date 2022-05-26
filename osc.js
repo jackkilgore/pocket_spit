@@ -1,5 +1,5 @@
-const OSC_PORT_IN = 12000 // osc port
-const OSC_PORT_OUT = 57121
+const OSC_PORT_IN = 12001 // osc port
+const OSC_PORT_OUT = 12003
 let socket
 let SLIDER_1_VAL_OSC = 0.001
 let SLIDER_1_VAL_JSON = 0.001

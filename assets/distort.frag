@@ -12,7 +12,7 @@ precision mediump int;
 uniform sampler2D u_state;
 uniform vec2 u_resolution;
 uniform float u_timeS;
-uniform float u_slider_1, u_slider_speed, u_slider_rot, u_slider_grit, u_slider_damp, u_slider_vert, u_slider_horiz;
+uniform float u_slider_1, u_slider_speed, u_slider_rot, u_slider_grit, u_slider_damp, u_slider_blob, u_slider_vert, u_slider_horiz;
 
 vec2 rotate2D(vec2 v, vec2 pivot, float angle) {
 	return
@@ -54,10 +54,10 @@ vec4 laplace(vec2 pos, float blobby, float scale) {
 	sum += texture2D(u_state,pos) * -1.0;
 
 	// Wrapping logic
-	float left = incr.x*2.;
-	float right = incr.x*2.;
-	float up = incr.y;
-	float down = incr.y;
+	float left = incr.x*2.*blobby;
+	float right = incr.x*2.*blobby*1.1;
+	float up = incr.y*blobby*0.9;
+	float down = incr.y*blobby*1.2;
 	if (pos.x - left < 0.) {
 	left = 0.;
 	}
@@ -192,20 +192,20 @@ void main( void ) {
 
 	// color_0_next will be influenced by some specified neighborhood.
 	//
-	float blob_factor = 10.2 * color_0_next.x; //* ( u_slider_1); // 0.2 or 100.2 2.0 * abs(sin(u_timeS*M_2PI * 0.04))
-	float scale_factor = 10000.005* color_1.x; //* (u_slider_1);  //
+	float blob_factor = 1.0; // * u_slider_blob; //* ( u_slider_1); // 0.2 or 100.2 2.0 * abs(sin(u_timeS*M_2PI * 0.04))
+	float scale_factor = 300.2* (u_slider_blob); //  + (10.2 * (color_0_next.x - 0.5)); //* (u_slider_1);  //
 	vec2 neighborhood = pos_0;
-	neighborhood.y = 1.0 - pos_0.y;
+	// neighborhood.y = 1.0 - neighborhood.y;
 
-	float neighbors_weight = 100.98;
+	float neighbors_weight = 1. * u_slider_damp;
 	float neighbors_weight_mod_freq = 0.0021;
 	float neighbors_weight_mod_weight = 0.4;
-	neighbors_weight = modulate_sine(neighbors_weight,
-						neighbors_weight_mod_weight,
-						neighbors_weight_mod_freq,
-						0.0,
-						0
-					);
+	// neighbors_weight = modulate_sine(neighbors_weight,
+	// 					neighbors_weight_mod_weight,
+	// 					neighbors_weight_mod_freq,
+	// 					0.0,
+	// 					0
+	// 				);
 	color_0_next = neighbor_influence(color_0_next,neighbors_weight,
 			neighborhood,
 			blob_factor,
@@ -241,6 +241,6 @@ void main( void ) {
 	float dt_mod_freq = 0.0000891 * abs(sin(color_0.y));
 	dt = modulate_sine(dt,dt_mod_weight,dt_mod_freq, 0.0,1);
 	gl_FragColor = color_0 + dt * (color_0_next - color_0);
-	gl_FragColor *= 1.0;
+	// gl_FragColor *= 0.01;
 
 }
