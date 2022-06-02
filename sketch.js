@@ -9,8 +9,8 @@ let seed
 let tmp
 let test_pixel
 let SEED_RES = [4,3]
-let CANVAS_RES = [1200,800]
-// let CANVAS_RES = [1920,1080]
+// let CANVAS_RES = [1200,800]
+let CANVAS_RES = [1600,900]
 // let CANVAS_RES = [3840,2160]
 // let CANVAS_RES = [7680,4320] // 8k
 let FRAMERATE = 60
